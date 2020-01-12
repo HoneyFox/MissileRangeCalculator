@@ -355,7 +355,7 @@
             this.picLegends.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.picLegends.Location = new System.Drawing.Point(814, 58);
             this.picLegends.Name = "picLegends";
-            this.picLegends.Size = new System.Drawing.Size(108, 248);
+            this.picLegends.Size = new System.Drawing.Size(108, 272);
             this.picLegends.TabIndex = 31;
             this.picLegends.TabStop = false;
             // 

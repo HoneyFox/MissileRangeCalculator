@@ -309,14 +309,14 @@ namespace MissileRangeCalculator
             return TAS / sonicSpeed;
         }
 
-        public float CalculateDrag(float deltaTime, float speed, float angle, float angleRate, float mass)
+        public float CalculateDrag(float deltaTime, float speed, float angle, float angleRate, float mass, out float liftAcc)
         {
             float dynPressure = GetDynPressure(curSpeed, curAlt);
             float drag0 = GetDragCoeff(TAStoMach(curSpeed, curAlt)) * refArea * dynPressure;
             float accForStraightFlight = (float)(Math.Cos(angle * Math.PI / 180f) * 9.81);
-            float curG = angleRate * speed;
-            float combinedG = (curG + accForStraightFlight);
-            float liftForce = combinedG * mass;
+            float curAcc = angleRate * speed;
+            liftAcc = (curAcc + accForStraightFlight);
+            float liftForce = liftAcc * mass;
             float liftCoeff = liftForce / refArea / dynPressure;
             liftCoeff = Math.Min(2f, Math.Max(liftCoeff, -2f));
             float cdL = liftCoeff * liftCoeff * idFactor;
@@ -330,6 +330,7 @@ namespace MissileRangeCalculator
         float curSpeed;
         float curAcc;
         float curAngle;
+        float curLiftAcc;
         float curHorDistance;
         float curHorDistance39;
 
@@ -344,10 +345,10 @@ namespace MissileRangeCalculator
         public void UpdateFrame()
         {
             float newAngle = GetPitchAngle(curTime);
-            float deltaAngle = Math.Abs(newAngle - curAngle);
-            curAngle = GetPitchAngle(curTime);
+            float deltaAngle = newAngle - curAngle;
+            curAngle = newAngle;
             float curMass = GetMass(curTime);
-            curAcc = (GetThrust(curTime) - CalculateDrag(deltaTime, curSpeed, curAngle, (float)(deltaAngle / deltaTime * Math.PI / 180f), curMass)) / curMass - 9.81f * (float)(Math.Sin(curAngle * Math.PI / 180f)) * deltaTime;
+            curAcc = (GetThrust(curTime) - CalculateDrag(deltaTime, curSpeed, curAngle, (float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, out curLiftAcc)) / curMass - 9.81f * (float)(Math.Sin(curAngle * Math.PI / 180f));
             curSpeed = curSpeed + curAcc * deltaTime;
             curHorDistance += curSpeed * (float)(Math.Cos(curAngle * Math.PI / 180f)) * deltaTime;
             curAlt += curSpeed * (float)(Math.Sin(curAngle * Math.PI / 180f)) * deltaTime;
@@ -374,7 +375,7 @@ namespace MissileRangeCalculator
             {
                 UpdateFrame();
                 plotter.Render(curFrame, curTime, curHorDistance, curHorDistance39,
-                    curAlt, curSpeed, TAStoIAS(curSpeed, curAlt), TAStoMach(curSpeed, curAlt), curAcc, curAngle,
+                    curAlt, curSpeed, TAStoIAS(curSpeed, curAlt), TAStoMach(curSpeed, curAlt), curAcc, curLiftAcc / 9.81f, curAngle,
                     curTargetDistance1, curTargetDistance2, curTargetDistance39);
                 curTime += deltaTime;
                 curFrame++;
@@ -411,12 +412,13 @@ namespace MissileRangeCalculator
             public float IAS;
             public float mach;
             public float acc;
+            public float liftG;
             public float angle;
             public float tgtDistance1;
             public float tgtDistance2;
             public float tgtDistance39;
 
-            public PlotData(int frame, float time, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
+            public PlotData(int frame, float time, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
             {
                 this.frame = frame;
                 this.time = time;
@@ -427,6 +429,7 @@ namespace MissileRangeCalculator
                 this.IAS = IAS;
                 this.mach = mach;
                 this.acc = acc;
+                this.liftG = liftG;
                 this.angle = angle;
                 this.tgtDistance1 = tgtDistance1;
                 this.tgtDistance2 = tgtDistance2;
@@ -444,6 +447,7 @@ namespace MissileRangeCalculator
                     .Append("IAS ").AppendLine(IAS.ToString())
                     .Append("Mach ").AppendLine(mach.ToString())
                     .Append("Acc ").AppendLine(acc.ToString())
+                    .Append("LiftG ").AppendLine(liftG.ToString())
                     .Append("Angle ").AppendLine(angle.ToString())
                     .Append("HDist ").AppendLine(horDistance.ToString())
                     .Append("HDist39 ").AppendLine(horDistance39.ToString())
@@ -517,9 +521,9 @@ namespace MissileRangeCalculator
             this.cutoffSpeed = s;
         }
 
-        public void Render(int frame, float time, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
+        public void Render(int frame, float time, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
         {
-            var data = new PlotData(frame, time, horDistance, horDistance39, alt, TAS, IAS, mach, acc, angle, tgtDistance1, tgtDistance2, tgtDistance39);
+            var data = new PlotData(frame, time, horDistance, horDistance39, alt, TAS, IAS, mach, acc, liftG, angle, tgtDistance1, tgtDistance2, tgtDistance39);
 
             if (isFirstFrame == false)
             {
@@ -540,6 +544,7 @@ namespace MissileRangeCalculator
             graphics.DrawLine(Pens.Red, data.frame, 0f, data.frame, data.TAS * 0.4f * scale);
             graphics.DrawLine(Pens.DarkRed, data.frame, 0f, data.frame, data.IAS * 0.4f * scale);
             graphics.DrawLine(Pens.Lime, data.frame, target.Height * 0.667f, data.frame, target.Height * 0.667f + data.acc * 2f * scale);
+            graphics.DrawLine(Pens.BlueViolet, data.frame, target.Height * 0.667f, data.frame, target.Height * 0.667f + data.liftG * 20f * scale);
             graphics.DrawLine(Pens.White, data.frame - 1, target.Height * 0.667f, data.frame, target.Height * 0.667f);
 
             if (prevData != null)
@@ -628,6 +633,11 @@ namespace MissileRangeCalculator
             legendsGraphics.FillRectangle(Brushes.Lime, new RectangleF(5f, y, 12f, 12f));
             legendsGraphics.DrawRectangle(Pens.Black, new Rectangle(5, (int)y, 12, 12));
             legendsGraphics.DrawString("Acc", font, Brushes.Black, 20f, y);
+
+            y += 20f;
+            legendsGraphics.FillRectangle(Brushes.BlueViolet, new RectangleF(5f, y, 12f, 12f));
+            legendsGraphics.DrawRectangle(Pens.Black, new Rectangle(5, (int)y, 12, 12));
+            legendsGraphics.DrawString("LiftG", font, Brushes.Black, 20f, y);
 
             y += 20f;
             legendsGraphics.FillRectangle(Brushes.Black, new RectangleF(5f, y, 12f, 12f));

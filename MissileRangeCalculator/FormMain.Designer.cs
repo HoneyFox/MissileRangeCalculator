@@ -93,8 +93,6 @@
             // 
             // txtMotor
             // 
-            this.txtMotor.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
             this.txtMotor.Location = new System.Drawing.Point(12, 58);
             this.txtMotor.Multiline = true;
             this.txtMotor.Name = "txtMotor";
@@ -239,7 +237,6 @@
             // 
             // label9
             // 
-            this.label9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label9.AutoSize = true;
             this.label9.Location = new System.Drawing.Point(13, 208);
             this.label9.Name = "label9";
@@ -249,7 +246,8 @@
             // 
             // txtPitch
             // 
-            this.txtPitch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtPitch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.txtPitch.Location = new System.Drawing.Point(12, 228);
             this.txtPitch.Multiline = true;
             this.txtPitch.Name = "txtPitch";

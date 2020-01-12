@@ -270,10 +270,18 @@ namespace MissileRangeCalculator
             {
                 return 0.36392f * (float)(Math.Exp((11000 - alt) / 6341.62));
             }
-            else
+            else if(alt <= 40000f)
             {
                 float T = 216.65f + 0.001f * (alt - 20000f);
                 return 0.088035f * (float)(Math.Pow(T / 216.65, -35.1632));
+            }
+            else if(alt <= 120000f)
+            {
+                return rho0 * (float)(Math.Pow(0.5, alt / 6000));
+            }
+            else
+            {
+                return 0f;
             }
         }
 
@@ -309,7 +317,7 @@ namespace MissileRangeCalculator
             return TAS / sonicSpeed;
         }
 
-        public float CalculateDrag(float deltaTime, float speed, float angle, float angleRate, float mass, out float liftAcc)
+        public float CalculateDrag(float deltaTime, float speed, float angle, float angleRate, float mass, out float liftAcc, out float liftCoeff)
         {
             float dynPressure = GetDynPressure(curSpeed, curAlt);
             float drag0 = GetDragCoeff(TAStoMach(curSpeed, curAlt)) * refArea * dynPressure;
@@ -317,10 +325,13 @@ namespace MissileRangeCalculator
             float curAcc = angleRate * speed;
             liftAcc = (curAcc + accForStraightFlight);
             float liftForce = liftAcc * mass;
-            float liftCoeff = liftForce / refArea / dynPressure;
-            liftCoeff = Math.Min(2f, Math.Max(liftCoeff, -2f));
-            float cdL = liftCoeff * liftCoeff * idFactor;
-            float dragL = cdL * refArea * dynPressure;
+            liftCoeff = liftForce / refArea / dynPressure;
+            float dragL = 0f;
+            if (dynPressure > 1e-6 && Math.Abs(liftCoeff) < 100f)
+            {
+                float cdL = liftCoeff * liftCoeff * idFactor;
+                dragL = cdL * refArea * dynPressure;
+            }
             return drag0 + dragL;
         }
 
@@ -331,6 +342,7 @@ namespace MissileRangeCalculator
         float curAcc;
         float curAngle;
         float curLiftAcc;
+        float curCLReq;
         float curHorDistance;
         float curHorDistance39;
 
@@ -348,7 +360,7 @@ namespace MissileRangeCalculator
             float deltaAngle = newAngle - curAngle;
             curAngle = newAngle;
             float curMass = GetMass(curTime);
-            curAcc = (GetThrust(curTime) - CalculateDrag(deltaTime, curSpeed, curAngle, (float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, out curLiftAcc)) / curMass - 9.81f * (float)(Math.Sin(curAngle * Math.PI / 180f));
+            curAcc = (GetThrust(curTime) - CalculateDrag(deltaTime, curSpeed, curAngle, (float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, out curLiftAcc, out curCLReq)) / curMass - 9.81f * (float)(Math.Sin(curAngle * Math.PI / 180f));
             curSpeed = curSpeed + curAcc * deltaTime;
             curHorDistance += curSpeed * (float)(Math.Cos(curAngle * Math.PI / 180f)) * deltaTime;
             curAlt += curSpeed * (float)(Math.Sin(curAngle * Math.PI / 180f)) * deltaTime;
@@ -375,7 +387,7 @@ namespace MissileRangeCalculator
             {
                 UpdateFrame();
                 plotter.Render(curFrame, curTime, curHorDistance, curHorDistance39,
-                    curAlt, curSpeed, TAStoIAS(curSpeed, curAlt), TAStoMach(curSpeed, curAlt), curAcc, curLiftAcc / 9.81f, curAngle,
+                    curAlt, curSpeed, TAStoIAS(curSpeed, curAlt), TAStoMach(curSpeed, curAlt), curAcc, curLiftAcc / 9.81f, curCLReq, curAngle,
                     curTargetDistance1, curTargetDistance2, curTargetDistance39);
                 curTime += deltaTime;
                 curFrame++;
@@ -413,12 +425,13 @@ namespace MissileRangeCalculator
             public float mach;
             public float acc;
             public float liftG;
+            public float reqCL;
             public float angle;
             public float tgtDistance1;
             public float tgtDistance2;
             public float tgtDistance39;
 
-            public PlotData(int frame, float time, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
+            public PlotData(int frame, float time, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float reqCL, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
             {
                 this.frame = frame;
                 this.time = time;
@@ -430,6 +443,7 @@ namespace MissileRangeCalculator
                 this.mach = mach;
                 this.acc = acc;
                 this.liftG = liftG;
+                this.reqCL = reqCL;
                 this.angle = angle;
                 this.tgtDistance1 = tgtDistance1;
                 this.tgtDistance2 = tgtDistance2;
@@ -448,6 +462,7 @@ namespace MissileRangeCalculator
                     .Append("Mach ").AppendLine(mach.ToString())
                     .Append("Acc ").AppendLine(acc.ToString())
                     .Append("LiftG ").AppendLine(liftG.ToString())
+                    .Append("ReqCL ").AppendLine(reqCL.ToString())
                     .Append("Angle ").AppendLine(angle.ToString())
                     .Append("HDist ").AppendLine(horDistance.ToString())
                     .Append("HDist39 ").AppendLine(horDistance39.ToString())
@@ -521,9 +536,9 @@ namespace MissileRangeCalculator
             this.cutoffSpeed = s;
         }
 
-        public void Render(int frame, float time, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
+        public void Render(int frame, float time, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float reqCL, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
         {
-            var data = new PlotData(frame, time, horDistance, horDistance39, alt, TAS, IAS, mach, acc, liftG, angle, tgtDistance1, tgtDistance2, tgtDistance39);
+            var data = new PlotData(frame, time, horDistance, horDistance39, alt, TAS, IAS, mach, acc, liftG, reqCL, angle, tgtDistance1, tgtDistance2, tgtDistance39);
 
             if (isFirstFrame == false)
             {

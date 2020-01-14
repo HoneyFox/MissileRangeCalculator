@@ -29,9 +29,9 @@ namespace MissileRangeCalculator
 
         private void btnSimulate_Click(object sender, EventArgs e)
         {
-            List<Tuple<float, float, float, float, float>> motorInfo = AnalyzeMotorInfo(txtMotor.Text);
-            List<Tuple<float, float, float, float>> angleRateInfo = AnalyzeAngleInfo(txtPitch.Text);
-
+            List<MotorInfo> motorInfo = MotorInfo.AnalyzeMotorInfo(txtMotor.Text);
+            List<AngleInfo> angleRateInfo = AngleInfo.AnalyzeAngleInfo(txtPitch.Text);
+           
             simulator = new Simulator(plotter, float.Parse(txtDeltaTime.Text), float.Parse(txtSubsonicDrag.Text), float.Parse(txtSupersonicDrag.Text), float.Parse(txtInducedDragFactor.Text),
                 motorInfo, float.Parse(txtDryMass.Text), float.Parse(txtDiameter.Text), float.Parse(txtInitSpeed.Text), float.Parse(txtInitAngle.Text), float.Parse(txtInitAlt.Text),
                 float.Parse(txtTargetSpeed.Text), float.Parse(txtTargetDistance.Text), angleRateInfo, float.Parse(txtCutoffSpeed.Text));
@@ -40,59 +40,6 @@ namespace MissileRangeCalculator
             plotter.SetCutoffSpeed(float.Parse(txtCutoffSpeed.Text));
             plotter.SetRenderScale(float.Parse(txtDisplayScale.Text));
             simulator.Simulate();
-        }
-
-        private List<Tuple<float, float, float, float, float>> AnalyzeMotorInfo(string text)
-        {
-            List<Tuple<float, float, float, float, float>> motorInfo = new List<Tuple<float, float, float, float, float>>();
-
-            float timeElapsed = 0f;
-            float totalPropellantMass = 0f;
-
-            string[] lines = text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < lines.Length; ++i)
-            {
-                string[] components = lines[i].Split(',');
-                float propellantMass = float.Parse(components[1]);
-                totalPropellantMass += propellantMass;
-            }
-
-            for (int i = 0; i < lines.Length; ++i)
-            {
-                string[] components = lines[i].Split(',');
-                float time = float.Parse(components[0]);
-                float propellantMass = float.Parse(components[1]);
-                float isp = float.Parse(components[2]);
-                float thrust = propellantMass / time * isp * 9.81f;
-
-                motorInfo.Add(new Tuple<float, float, float, float, float>(timeElapsed, timeElapsed + time, thrust, totalPropellantMass, totalPropellantMass - propellantMass));
-                timeElapsed += time;
-                totalPropellantMass -= propellantMass;
-            }
-
-            return motorInfo;
-        }
-
-        private List<Tuple<float, float, float, float>> AnalyzeAngleInfo(string text)
-        {
-            List<Tuple<float, float, float, float>> angleInfo = new List<Tuple<float, float, float, float>>();
-
-            float timeElapsed = 0f;
-            float totalAngleRotated = 0f;
-
-            string[] lines = text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < lines.Length; ++i)
-            {
-                string[] components = lines[i].Split(',');
-                float time = float.Parse(components[0]);
-                float angleRate = float.Parse(components[1]);
-
-                angleInfo.Add(new Tuple<float, float, float, float>(timeElapsed, timeElapsed + time, totalAngleRotated, totalAngleRotated + angleRate * time));
-                timeElapsed += time;
-                totalAngleRotated += angleRate * time;
-            }
-
-            return angleInfo;
         }
 
         private void picMain_MouseDown(object sender, MouseEventArgs e)
@@ -139,6 +86,96 @@ namespace MissileRangeCalculator
         }
     }
 
+    public class MotorInfo
+    {
+        public static List<MotorInfo> AnalyzeMotorInfo(string text)
+        {
+            List<MotorInfo> motorInfo = new List<MotorInfo>();
+
+            float timeElapsed = 0f;
+            float totalPropellantMass = 0f;
+
+            string[] lines = text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < lines.Length; ++i)
+            {
+                string[] components = lines[i].Split(',');
+                float propellantMass = float.Parse(components[1]);
+                totalPropellantMass += propellantMass;
+            }
+
+            for (int i = 0; i < lines.Length; ++i)
+            {
+                string[] components = lines[i].Split(',');
+                float time = float.Parse(components[0]);
+                float propellantMass = float.Parse(components[1]);
+                float isp = float.Parse(components[2]);
+                float thrust = propellantMass / time * isp * 9.81f;
+
+                motorInfo.Add(new MotorInfo(timeElapsed, timeElapsed + time, thrust, totalPropellantMass, totalPropellantMass - propellantMass));
+                timeElapsed += time;
+                totalPropellantMass -= propellantMass;
+            }
+
+            return motorInfo;
+        }
+
+
+        public float timeStart;
+        public float timeEnd;
+        public float thrust;
+        public float propellantMassStart;
+        public float propellantMassEnd;
+
+        public MotorInfo(float timeStart, float timeEnd, float thrust, float propellantMassStart, float propellantMassEnd)
+        {
+            this.timeStart = timeStart;
+            this.timeEnd = timeEnd;
+            this.thrust = thrust;
+            this.propellantMassStart = propellantMassStart;
+            this.propellantMassEnd = propellantMassEnd;
+        }
+    }
+
+    public class AngleInfo
+    {
+        public static List<AngleInfo> AnalyzeAngleInfo(string text)
+        {
+            List<AngleInfo> angleInfo = new List<AngleInfo>();
+
+            float timeElapsed = 0f;
+
+            string[] lines = text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < lines.Length; ++i)
+            {
+                string[] components = lines[i].Split(',');
+                float time = float.Parse(components[0]);
+                bool useLiftG = components[1].EndsWith("g", StringComparison.InvariantCultureIgnoreCase);
+                if (useLiftG)
+                    angleInfo.Add(new AngleInfo(timeElapsed, timeElapsed + time, 0, true, float.Parse(components[1].TrimEnd('g', 'G'))));
+                else
+                    angleInfo.Add(new AngleInfo(timeElapsed, timeElapsed + time, float.Parse(components[1]), false, 0));
+                timeElapsed += time;
+            }
+
+            return angleInfo;
+        }
+
+        public float timeStart;
+        public float timeEnd;
+        public float angleRate;
+        public bool useLiftG;
+        public float liftG;
+
+        public AngleInfo(float timeStart, float timeEnd, float angleRate, bool useLiftG, float liftG)
+        {
+            this.timeStart = timeStart;
+            this.timeEnd = timeEnd;
+            this.angleRate = angleRate;
+            this.useLiftG = useLiftG;
+            this.liftG = liftG;
+        }
+    }
+
     public class Simulator
     {
         private Plotter plotter;
@@ -147,7 +184,7 @@ namespace MissileRangeCalculator
         float cd0;
         float cd1;
         float idFactor;
-        List<Tuple<float, float, float, float, float>> motorInfo;
+        List<MotorInfo> motorInfo;
         float dryMass;
         float refArea;
         float initSpeed;
@@ -155,13 +192,13 @@ namespace MissileRangeCalculator
         float initAlt;
         float targetSpeed;
         float targetDistance;
-        List<Tuple<float, float, float, float>> angleRateInfo;
+        List<AngleInfo> angleRateInfo;
         float cutoffSpeed;
 
         float maxThrustTime;
 
-        public Simulator(Plotter plotter, float deltaTime, float cd0, float cd1, float idFactor, List<Tuple<float, float, float, float, float>> motorInfo, float dryMass, float diameter, 
-            float initSpeed, float initAngle, float initAlt, float targetSpeed, float targetDistance, List<Tuple<float, float, float, float>> angleRateInfo, float cutoffSpeed)
+        public Simulator(Plotter plotter, float deltaTime, float cd0, float cd1, float idFactor, List<MotorInfo> motorInfo, float dryMass, float diameter, 
+            float initSpeed, float initAngle, float initAlt, float targetSpeed, float targetDistance, List<AngleInfo> angleRateInfo, float cutoffSpeed)
         {
             this.plotter = plotter;
             this.deltaTime = deltaTime;
@@ -179,7 +216,7 @@ namespace MissileRangeCalculator
             this.angleRateInfo = angleRateInfo;
             this.cutoffSpeed = cutoffSpeed;
 
-            this.maxThrustTime = motorInfo[motorInfo.Count - 1].Item2;
+            this.maxThrustTime = motorInfo[motorInfo.Count - 1].timeEnd;
         }
 
         public static float Lerp(float start, float end, float t)
@@ -196,9 +233,9 @@ namespace MissileRangeCalculator
         {
             for(int i = 0; i < motorInfo.Count; ++i)
             {
-                if (motorInfo[i].Item1 <= time && motorInfo[i].Item2 > time)
+                if (motorInfo[i].timeStart <= time && motorInfo[i].timeEnd > time)
                 {
-                    return motorInfo[i].Item3;
+                    return motorInfo[i].thrust;
                 }
             }
 
@@ -209,10 +246,10 @@ namespace MissileRangeCalculator
         {
             for (int i = 0; i < motorInfo.Count; ++i)
             {
-                if (motorInfo[i].Item1 <= time && motorInfo[i].Item2 > time)
+                if (motorInfo[i].timeStart <= time && motorInfo[i].timeEnd > time)
                 {
-                    float t = Unlerp(motorInfo[i].Item1, motorInfo[i].Item2, time);
-                    float currentPropellantMass = Lerp(motorInfo[i].Item4, motorInfo[i].Item5, t);
+                    float t = Unlerp(motorInfo[i].timeStart, motorInfo[i].timeEnd, time);
+                    float currentPropellantMass = Lerp(motorInfo[i].propellantMassStart, motorInfo[i].propellantMassEnd, t);
                     return dryMass + currentPropellantMass;
                 }
             }
@@ -220,19 +257,26 @@ namespace MissileRangeCalculator
             return dryMass;
         }
         
-        public float GetPitchAngle(float time)
+        public float GetPitchAngle(float time, float deltaTime, float mass)
         {
             for(int i = 0; i < angleRateInfo.Count; ++i)
             {
-                if(angleRateInfo[i].Item1 <= time && angleRateInfo[i].Item2 > time)
+                if(angleRateInfo[i].timeStart <= time && angleRateInfo[i].timeEnd > time)
                 {
-                    float t = Unlerp(angleRateInfo[i].Item1, angleRateInfo[i].Item2, time);
-                    float currentRotatedAngle = Lerp(angleRateInfo[i].Item3, angleRateInfo[i].Item4, t);
-                    return initAngle + currentRotatedAngle;
+                    if (angleRateInfo[i].useLiftG == false)
+                    {
+                        return curAngle + angleRateInfo[i].angleRate * deltaTime;
+                    }
+                    else
+                    {
+                        float accForStraightFlight = (float)(Math.Cos(curAngle * Math.PI / 180f) * 9.81);
+                        float angleRate = (angleRateInfo[i].liftG * 9.81f - accForStraightFlight) / curSpeed;
+                        return curAngle + (float)(angleRate * 180f / Math.PI) * deltaTime;
+                    }
                 }
             }
 
-            return initAngle + angleRateInfo[angleRateInfo.Count - 1].Item4;
+            return curAngle;
         }
 
         public float GetDragCoeff(float mach)
@@ -317,12 +361,12 @@ namespace MissileRangeCalculator
             return TAS / sonicSpeed;
         }
 
-        public float CalculateDrag(float deltaTime, float speed, float angle, float angleRate, float mass, out float liftAcc, out float liftCoeff)
+        public float CalculateDrag(float angleRate, float mass, out float liftAcc, out float liftCoeff)
         {
             float dynPressure = GetDynPressure(curSpeed, curAlt);
             float drag0 = GetDragCoeff(TAStoMach(curSpeed, curAlt)) * refArea * dynPressure;
-            float accForStraightFlight = (float)(Math.Cos(angle * Math.PI / 180f) * 9.81);
-            float curAcc = angleRate * speed;
+            float accForStraightFlight = (float)(Math.Cos(curAngle * Math.PI / 180f) * 9.81);
+            float curAcc = angleRate * curSpeed;
             liftAcc = (curAcc + accForStraightFlight);
             float liftForce = liftAcc * mass;
             liftCoeff = liftForce / refArea / dynPressure;
@@ -356,11 +400,11 @@ namespace MissileRangeCalculator
 
         public void UpdateFrame()
         {
-            float newAngle = GetPitchAngle(curTime);
+            float curMass = GetMass(curTime);
+            float newAngle = GetPitchAngle(curTime, deltaTime, curMass);
             float deltaAngle = newAngle - curAngle;
             curAngle = newAngle;
-            float curMass = GetMass(curTime);
-            curAcc = (GetThrust(curTime) - CalculateDrag(deltaTime, curSpeed, curAngle, (float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, out curLiftAcc, out curCLReq)) / curMass - 9.81f * (float)(Math.Sin(curAngle * Math.PI / 180f));
+            curAcc = (GetThrust(curTime) - CalculateDrag((float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, out curLiftAcc, out curCLReq)) / curMass - 9.81f * (float)(Math.Sin(curAngle * Math.PI / 180f));
             curSpeed = curSpeed + curAcc * deltaTime;
             curHorDistance += curSpeed * (float)(Math.Cos(curAngle * Math.PI / 180f)) * deltaTime;
             curAlt += curSpeed * (float)(Math.Sin(curAngle * Math.PI / 180f)) * deltaTime;

@@ -61,6 +61,8 @@
             this.txtInducedDragFactor = new System.Windows.Forms.TextBox();
             this.picPlotData = new System.Windows.Forms.PictureBox();
             this.picLegends = new System.Windows.Forms.PictureBox();
+            this.label14 = new System.Windows.Forms.Label();
+            this.txtCLMax = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.picMain)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPlotData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picLegends)).BeginInit();
@@ -188,7 +190,7 @@
             // btnSimulate
             // 
             this.btnSimulate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSimulate.Location = new System.Drawing.Point(814, 31);
+            this.btnSimulate.Location = new System.Drawing.Point(928, 31);
             this.btnSimulate.Name = "btnSimulate";
             this.btnSimulate.Size = new System.Drawing.Size(109, 22);
             this.btnSimulate.TabIndex = 14;
@@ -230,7 +232,7 @@
             this.picMain.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.picMain.Location = new System.Drawing.Point(180, 58);
             this.picMain.Name = "picMain";
-            this.picMain.Size = new System.Drawing.Size(628, 545);
+            this.picMain.Size = new System.Drawing.Size(742, 545);
             this.picMain.TabIndex = 18;
             this.picMain.TabStop = false;
             this.picMain.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picMain_MouseDown);
@@ -240,9 +242,9 @@
             this.label9.AutoSize = true;
             this.label9.Location = new System.Drawing.Point(13, 208);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(95, 12);
+            this.label9.Size = new System.Drawing.Size(155, 12);
             this.label9.TabIndex = 19;
-            this.label9.Text = "Time, AngleRate";
+            this.label9.Text = "Time, AngleRate/G, Target";
             // 
             // txtPitch
             // 
@@ -293,7 +295,7 @@
             // 
             this.label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(545, 36);
+            this.label12.Location = new System.Drawing.Point(659, 36);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(53, 12);
             this.label12.TabIndex = 25;
@@ -302,7 +304,7 @@
             // txtDeltaTime
             // 
             this.txtDeltaTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDeltaTime.Location = new System.Drawing.Point(604, 31);
+            this.txtDeltaTime.Location = new System.Drawing.Point(718, 31);
             this.txtDeltaTime.Name = "txtDeltaTime";
             this.txtDeltaTime.Size = new System.Drawing.Size(66, 21);
             this.txtDeltaTime.TabIndex = 26;
@@ -312,7 +314,7 @@
             // 
             this.label13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(676, 36);
+            this.label13.Location = new System.Drawing.Point(790, 36);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(77, 12);
             this.label13.TabIndex = 27;
@@ -321,7 +323,7 @@
             // txtDisplayScale
             // 
             this.txtDisplayScale.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDisplayScale.Location = new System.Drawing.Point(759, 31);
+            this.txtDisplayScale.Location = new System.Drawing.Point(873, 31);
             this.txtDisplayScale.Name = "txtDisplayScale";
             this.txtDisplayScale.Size = new System.Drawing.Size(49, 21);
             this.txtDisplayScale.TabIndex = 28;
@@ -351,17 +353,36 @@
             this.picLegends.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.picLegends.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.picLegends.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.picLegends.Location = new System.Drawing.Point(814, 58);
+            this.picLegends.Location = new System.Drawing.Point(928, 58);
             this.picLegends.Name = "picLegends";
             this.picLegends.Size = new System.Drawing.Size(108, 272);
             this.picLegends.TabIndex = 31;
             this.picLegends.TabStop = false;
             // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(520, 36);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(41, 12);
+            this.label14.TabIndex = 32;
+            this.label14.Text = "CL Max";
+            // 
+            // txtCLMax
+            // 
+            this.txtCLMax.Location = new System.Drawing.Point(567, 31);
+            this.txtCLMax.Name = "txtCLMax";
+            this.txtCLMax.Size = new System.Drawing.Size(56, 21);
+            this.txtCLMax.TabIndex = 33;
+            this.txtCLMax.Text = "2.4";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(930, 611);
+            this.ClientSize = new System.Drawing.Size(1044, 611);
+            this.Controls.Add(this.txtCLMax);
+            this.Controls.Add(this.label14);
             this.Controls.Add(this.picLegends);
             this.Controls.Add(this.picPlotData);
             this.Controls.Add(this.txtInducedDragFactor);
@@ -396,7 +417,7 @@
             this.Controls.Add(this.txtSubsonicDrag);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
-            this.MinimumSize = new System.Drawing.Size(946, 650);
+            this.MinimumSize = new System.Drawing.Size(1060, 650);
             this.Name = "FormMain";
             this.Text = "Missie Range Calculator";
             this.Load += new System.EventHandler(this.FormMain_Load);
@@ -442,6 +463,8 @@
         private System.Windows.Forms.TextBox txtInducedDragFactor;
         private System.Windows.Forms.PictureBox picPlotData;
         private System.Windows.Forms.PictureBox picLegends;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.TextBox txtCLMax;
     }
 }
 

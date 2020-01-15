@@ -253,7 +253,9 @@ namespace MissileRangeCalculator
 
         public static float MoveTowards(float value, float target, float maxStep)
         {
-            if (target != value && (target - value) * (target - (value + maxStep)) <= 0)
+            if (target == value && maxStep != 0)
+                throw new InvalidOperationException("Something goes wrong with the logic.");
+            if ((target - value) * (target - (value + maxStep)) <= 0)
                 return target;
             else
                 return value + maxStep;
@@ -302,30 +304,45 @@ namespace MissileRangeCalculator
                 {
                     if (curSpeed > 0)
                     {
-                        float maxLiftG = GetMaxLiftForce() / mass;
+                        float originalAngle = curAngle;
+                        float gravityAngleRate = (float)(-accForStraightFlight / curSpeed * 180 / Math.PI);
+                        curAngle += gravityAngleRate * deltaTime;
+                                
+                        float maxLiftAcc = GetMaxLiftForce() / mass;
 
-                        float accRequired;
+                        float liftAccRequired;
                         if (angleRateInfo[i].useLiftG == false)
                         {
                             if (angleRateInfo[i].useTargetAngle)
-                                accRequired = (float)(angleRateInfo[i].angleRate * Math.Sign(angleRateInfo[i].targetAngle - curAngle) * Math.PI / 180 * curSpeed);
+                                liftAccRequired = (float)((angleRateInfo[i].angleRate - gravityAngleRate) * Math.Sign(angleRateInfo[i].targetAngle - curAngle) * Math.PI / 180 * curSpeed);
                             else
-                                accRequired = (float)(angleRateInfo[i].angleRate * Math.PI / 180) * curSpeed;
+                                liftAccRequired = (float)((angleRateInfo[i].angleRate - gravityAngleRate) * Math.PI / 180) * curSpeed;
                         }
                         else
                         {
                             if (angleRateInfo[i].useTargetAngle)
-                                accRequired = angleRateInfo[i].liftG * 9.81f * Math.Sign(angleRateInfo[i].targetAngle - curAngle) - accForStraightFlight;
+                            {
+                                liftAccRequired = angleRateInfo[i].liftG * 9.81f * Math.Sign(angleRateInfo[i].targetAngle - curAngle);
+                            }
                             else
-                                accRequired = angleRateInfo[i].liftG * 9.81f - accForStraightFlight;
+                            {
+                                liftAccRequired = angleRateInfo[i].liftG * 9.81f;
+                            }
                         }
-                        float liftAccRequired = accRequired + accForStraightFlight;
-                        float actualLiftAcc = Clamp(liftAccRequired, -maxLiftG, maxLiftG);
-                        float angleRate = (actualLiftAcc - accForStraightFlight) / curSpeed;
+                        float actualLiftAcc = Clamp(liftAccRequired, -maxLiftAcc, maxLiftAcc);
+                        float angleRate = actualLiftAcc / curSpeed;
                         if (angleRateInfo[i].useTargetAngle)
-                            return MoveTowards(curAngle, angleRateInfo[i].targetAngle, (float)(angleRate * 180 / Math.PI) * deltaTime);
+                        {
+                            float result = MoveTowards(curAngle, angleRateInfo[i].targetAngle, (float)(angleRate * 180 / Math.PI) * deltaTime);
+                            curAngle = originalAngle;
+                            return result;
+                        }
                         else
-                            return curAngle + (float)(angleRate * 180 / Math.PI) * deltaTime;
+                        {
+                            float result = curAngle + (float)(angleRate * 180 / Math.PI) * deltaTime;
+                            curAngle = originalAngle;
+                            return result;
+                        }
                     }
                     else
                     {

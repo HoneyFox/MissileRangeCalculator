@@ -253,7 +253,7 @@ namespace MissileRangeCalculator
 
         public static float MoveTowards(float value, float target, float maxStep)
         {
-            if ((target - value) * (target - (value + maxStep)) <= 0)
+            if (target != value && (target - value) * (target - (value + maxStep)) <= 0)
                 return target;
             else
                 return value + maxStep;
@@ -308,14 +308,14 @@ namespace MissileRangeCalculator
                         if (angleRateInfo[i].useLiftG == false)
                         {
                             if (angleRateInfo[i].useTargetAngle)
-                                accRequired = (float)(angleRateInfo[i].angleRate * (angleRateInfo[i].targetAngle > curAngle ? 1 : -1) * Math.PI / 180) * curSpeed;
+                                accRequired = (float)(angleRateInfo[i].angleRate * Math.Sign(angleRateInfo[i].targetAngle - curAngle) * Math.PI / 180 * curSpeed);
                             else
                                 accRequired = (float)(angleRateInfo[i].angleRate * Math.PI / 180) * curSpeed;
                         }
                         else
                         {
                             if (angleRateInfo[i].useTargetAngle)
-                                accRequired = angleRateInfo[i].liftG * 9.81f * (angleRateInfo[i].targetAngle > curAngle ? 1 : -1) - accForStraightFlight;
+                                accRequired = angleRateInfo[i].liftG * 9.81f * Math.Sign(angleRateInfo[i].targetAngle - curAngle) - accForStraightFlight;
                             else
                                 accRequired = angleRateInfo[i].liftG * 9.81f - accForStraightFlight;
                         }

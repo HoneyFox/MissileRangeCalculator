@@ -1,9 +1,0 @@
-C:\Users\yanfa\Documents\MissileRangeCalculator\MissileRangeCalculator\bin\Release\MissileRangeCalculator.exe.config
-C:\Users\yanfa\Documents\MissileRangeCalculator\MissileRangeCalculator\bin\Release\MissileRangeCalculator.exe
-C:\Users\yanfa\Documents\MissileRangeCalculator\MissileRangeCalculator\bin\Release\MissileRangeCalculator.pdb
-C:\Users\yanfa\Documents\MissileRangeCalculator\MissileRangeCalculator\obj\Release\MissileRangeCalculator.FormMain.resources
-C:\Users\yanfa\Documents\MissileRangeCalculator\MissileRangeCalculator\obj\Release\MissileRangeCalculator.Properties.Resources.resources
-C:\Users\yanfa\Documents\MissileRangeCalculator\MissileRangeCalculator\obj\Release\MissileRangeCalculator.csproj.GenerateResource.Cache
-C:\Users\yanfa\Documents\MissileRangeCalculator\MissileRangeCalculator\obj\Release\MissileRangeCalculator.csproj.CoreCompileInputs.cache
-C:\Users\yanfa\Documents\MissileRangeCalculator\MissileRangeCalculator\obj\Release\MissileRangeCalculator.exe
-C:\Users\yanfa\Documents\MissileRangeCalculator\MissileRangeCalculator\obj\Release\MissileRangeCalculator.pdb

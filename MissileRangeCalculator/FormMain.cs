@@ -380,7 +380,7 @@ namespace MissileRangeCalculator
             }
             else if(alt <= 120000f)
             {
-                return rho0 * (float)(Math.Pow(0.5, alt / 6000));
+                return 0.003946607f * (float)(Math.Pow(0.5, (alt - 40000) / 6000));
             }
             else
             {
@@ -562,19 +562,19 @@ namespace MissileRangeCalculator
                 StringBuilder sb = new StringBuilder();
                 sb
                     .Append("Frame ").AppendLine(frame.ToString())
-                    .Append("Time ").AppendLine(time.ToString())
-                    .Append("Alt ").AppendLine(alt.ToString())
-                    .Append("TAS ").AppendLine(TAS.ToString())
-                    .Append("IAS ").AppendLine(IAS.ToString())
-                    .Append("Mach ").AppendLine(mach.ToString())
-                    .Append("Acc ").AppendLine(acc.ToString())
-                    .Append("LiftG ").AppendLine(liftG.ToString())
-                    .Append("ReqCL ").AppendLine(reqCL.ToString())
-                    .Append("Angle ").AppendLine(angle.ToString())
-                    .Append("HDist ").AppendLine(horDistance.ToString())
-                    .Append("HDist39 ").AppendLine(horDistance39.ToString())
-                    .Append("TgtDist ").Append(tgtDistance1.ToString()).Append(" ").AppendLine(tgtDistance2.ToString())
-                    .Append("TgtDist39 ").AppendLine(tgtDistance39.ToString());
+                    .Append("Time ").AppendLine(time.ToString("F2"))
+                    .Append("Alt ").AppendLine(alt.ToString("F2"))
+                    .Append("TAS ").AppendLine(TAS.ToString("F2"))
+                    .Append("IAS ").AppendLine(IAS.ToString("F2"))
+                    .Append("Mach ").AppendLine(mach.ToString("F2"))
+                    .Append("Acc ").AppendLine(acc.ToString("F2"))
+                    .Append("LiftG ").AppendLine(liftG.ToString("F2"))
+                    .Append("ReqCL ").AppendLine(reqCL.ToString("F2"))
+                    .Append("Angle ").AppendLine(angle.ToString("F2"))
+                    .Append("HDist ").AppendLine(horDistance.ToString("F2"))
+                    .Append("HDist39 ").AppendLine(horDistance39.ToString("F2"))
+                    .Append("TgtDist ").Append(tgtDistance1.ToString("F2")).Append(" ").AppendLine(tgtDistance2.ToString("F2"))
+                    .Append("TgtDist39 ").AppendLine(tgtDistance39.ToString("F2"));
 
                 return sb.ToString();
             }

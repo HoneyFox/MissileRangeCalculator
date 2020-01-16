@@ -44,6 +44,7 @@ namespace MissileRangeCalculator
 
         private void picMain_MouseDown(object sender, MouseEventArgs e)
         {
+            picMain.Focus();
             if (simulator != null)
             {
                 plotter.OnClick(e.X, e.Y);

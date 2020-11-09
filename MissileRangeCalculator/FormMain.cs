@@ -376,12 +376,18 @@ namespace MissileRangeCalculator
             return dryMass;
         }
 
+        public double GetLocalG()
+        {
+            const double earthRadius = 6371000f;
+            return Math.Pow(earthRadius / (curAlt + earthRadius), 2) * 9.81;
+        }
+
         public double GetNetG()
         {
             double horSpeed = curSpeed * Math.Cos(curAngle * Math.PI / 180f);
             const double earthRadius = 6371000f;
             double centrifugalAcc = horSpeed * horSpeed / earthRadius;
-            return 9.81 - centrifugalAcc;
+            return GetLocalG() - centrifugalAcc;
         }
         
         public float GetMaxLiftForce()
@@ -578,7 +584,7 @@ namespace MissileRangeCalculator
             float curMass = GetMass(curTime);
             float newAngle = UpdatePitchAngle(curTime, deltaTime, curMass);
             float deltaAngle = newAngle - curAngle;
-            curAcc = (GetThrust(curTime) - CalculateDrag((float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, out curLiftAcc, out curCLReq)) / curMass - 9.81f * (float)(Math.Sin(curAngle * Math.PI / 180f));
+            curAcc = (GetThrust(curTime) - CalculateDrag((float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, out curLiftAcc, out curCLReq)) / curMass - GetLocalG() * (float)(Math.Sin(curAngle * Math.PI / 180f));
             curAngle = newAngle;
             curSpeed = curSpeed + curAcc * deltaTime;
             curHorDistance += curSpeed * (float)(Math.Cos(curAngle * Math.PI / 180f)) * deltaTime;

@@ -584,7 +584,7 @@ namespace MissileRangeCalculator
             float curMass = GetMass(curTime);
             float newAngle = UpdatePitchAngle(curTime, deltaTime, curMass);
             float deltaAngle = newAngle - curAngle;
-            curAcc = (GetThrust(curTime) - CalculateDrag((float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, out curLiftAcc, out curCLReq)) / curMass - GetLocalG() * (float)(Math.Sin(curAngle * Math.PI / 180f));
+            curAcc = (GetThrust(curTime) - CalculateDrag((float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, out curLiftAcc, out curCLReq)) / curMass - (float)(GetLocalG() * Math.Sin(curAngle * Math.PI / 180f));
             curAngle = newAngle;
             curSpeed = curSpeed + curAcc * deltaTime;
             curHorDistance += curSpeed * (float)(Math.Cos(curAngle * Math.PI / 180f)) * deltaTime;

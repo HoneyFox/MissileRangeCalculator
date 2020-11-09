@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -53,6 +54,54 @@ namespace MissileRangeCalculator
                 picPlotData.Refresh();
             }
         }
+        private void btnCopy_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(GenerateInfo());
+        }
+        private void btnPaste_Click(object sender, EventArgs e)
+        {
+            ParseInfo(Clipboard.GetText());
+        }
+
+        private string GenerateInfo()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("MRCData");
+            sb.AppendLine(txtSubsonicDrag.Text).AppendLine(txtSupersonicDrag.Text).AppendLine(txtInducedDragFactor.Text);
+            sb.AppendLine(txtDryMass.Text).AppendLine(txtDiameter.Text);
+            sb.AppendLine(txtInitSpeed.Text).AppendLine(txtInitAlt.Text).AppendLine(txtInitAngle.Text).AppendLine(txtCutoffSpeed.Text);
+            sb.AppendLine(txtTargetSpeed.Text).AppendLine(txtTargetDistance.Text).AppendLine(txtCLMax.Text);
+            sb.AppendLine(txtDeltaTime.Text).AppendLine(txtDisplayScale.Text);
+            sb.AppendLine(txtMotor.Lines.Length.ToString()).AppendLine(txtMotor.Text);
+            sb.AppendLine(txtPitch.Lines.Length.ToString()).Append(txtPitch.Text);
+            return sb.ToString();
+        }
+
+        private void ParseInfo(string data)
+        {
+            string[] lines = data.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            if (lines[0] == "MRCData")
+            {
+                uint lineIndex = 1;
+                txtSubsonicDrag.Text = lines[lineIndex++]; txtSupersonicDrag.Text = lines[lineIndex++]; txtInducedDragFactor.Text = lines[lineIndex++];
+                txtDryMass.Text = lines[lineIndex++]; txtDiameter.Text = lines[lineIndex++];
+                txtInitSpeed.Text = lines[lineIndex++]; txtInitAlt.Text = lines[lineIndex++]; txtInitAngle.Text = lines[lineIndex++]; txtCutoffSpeed.Text = lines[lineIndex++];
+                txtTargetSpeed.Text = lines[lineIndex++]; txtTargetDistance.Text = lines[lineIndex++]; txtCLMax.Text = lines[lineIndex++];
+                txtDeltaTime.Text = lines[lineIndex++]; txtDisplayScale.Text = lines[lineIndex++];
+                txtMotor.Text = "";
+                uint motorLineCount = uint.Parse(lines[lineIndex++]);
+                for(uint i = 0; i < motorLineCount; ++i)
+                {
+                    txtMotor.Text += lines[lineIndex++] + (i < motorLineCount - 1 ? Environment.NewLine : "");
+                }
+                txtPitch.Text = "";
+                uint pitchLineCount = uint.Parse(lines[lineIndex++]);
+                for (uint i = 0; i < pitchLineCount; ++i)
+                {
+                    txtPitch.Text += lines[lineIndex++] + (i < pitchLineCount - 1 ? Environment.NewLine : "");
+                }
+            }
+        }
 
         protected override bool ProcessDialogKey(Keys keyData)
         {
@@ -84,6 +133,43 @@ namespace MissileRangeCalculator
             {
                 plotter.OnSlide(e.KeyCode == Keys.Left ? -1 : 1);
             }
+        }
+
+        private void btnOpen_Click(object sender, EventArgs e)
+        {
+            var dialogResult = openFileDialog.ShowDialog();
+            if (dialogResult == DialogResult.OK)
+            {
+                ParseInfo(File.ReadAllText(openFileDialog.FileName));
+            }
+        }
+
+        private void btnSaveAs_Click(object sender, EventArgs e)
+        {
+            var dialogResult = saveFileDialog.ShowDialog();
+            if (dialogResult == DialogResult.OK)
+            {
+                File.WriteAllText(saveFileDialog.FileName, GenerateInfo());
+            }
+        }
+
+        private void FormMain_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files.Length == 1)
+                    e.Effect = DragDropEffects.Copy;
+                else
+                    e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void FormMain_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            if (files.Length == 1)
+                ParseInfo(File.ReadAllText(files[0]));
         }
     }
 
@@ -214,7 +300,7 @@ namespace MissileRangeCalculator
 
         float maxThrustTime;
 
-        public Simulator(Plotter plotter, float deltaTime, float cd0, float cd1, float idFactor, float maxLiftCoeff, List<MotorInfo> motorInfo, float dryMass, float diameter, 
+        public Simulator(Plotter plotter, float deltaTime, float cd0, float cd1, float idFactor, float maxLiftCoeff, List<MotorInfo> motorInfo, float dryMass, float diameter,
             float initSpeed, float initAngle, float initAlt, float targetSpeed, float targetDistance, List<AngleInfo> angleRateInfo, float cutoffSpeed)
         {
             this.plotter = plotter;
@@ -264,7 +350,7 @@ namespace MissileRangeCalculator
 
         public float GetThrust(float time)
         {
-            for(int i = 0; i < motorInfo.Count; ++i)
+            for (int i = 0; i < motorInfo.Count; ++i)
             {
                 if (motorInfo[i].timeStart <= time && motorInfo[i].timeEnd > time)
                 {
@@ -289,6 +375,14 @@ namespace MissileRangeCalculator
 
             return dryMass;
         }
+
+        public double GetNetG()
+        {
+            double horSpeed = curSpeed * Math.Cos(curAngle * Math.PI / 180f);
+            const double earthRadius = 6371000f;
+            double centrifugalAcc = horSpeed * horSpeed / earthRadius;
+            return 9.81 - centrifugalAcc;
+        }
         
         public float GetMaxLiftForce()
         {
@@ -298,7 +392,7 @@ namespace MissileRangeCalculator
 
         public float UpdatePitchAngle(float time, float deltaTime, float mass)
         {
-            float accForStraightFlight = (float)(Math.Cos(curAngle * Math.PI / 180f) * 9.81);
+            float accForStraightFlight = (float)(Math.Cos(curAngle * Math.PI / 180f) * GetNetG());
             for(int i = 0; i < angleRateInfo.Count; ++i)
             {
                 if(angleRateInfo[i].timeStart <= time && angleRateInfo[i].timeEnd > time)
@@ -442,7 +536,7 @@ namespace MissileRangeCalculator
         {
             float dynPressure = GetDynPressure(curSpeed, curAlt);
             float drag0 = GetDragCoeff(TAStoMach(curSpeed, curAlt)) * refArea * dynPressure;
-            float accForStraightFlight = (float)(Math.Cos(curAngle * Math.PI / 180f) * 9.81);
+            float accForStraightFlight = (float)(Math.Cos(curAngle * Math.PI / 180f) * GetNetG());
             float curAcc = angleRate * curSpeed;
             liftAcc = (curAcc + accForStraightFlight);
             float liftForce = liftAcc * mass;

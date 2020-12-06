@@ -607,10 +607,13 @@ namespace MissileRangeCalculator
             curHorDistance = curHorDistance39 = 0f;
 
             curTargetDistance1 = curTargetDistance2 = curTargetDistance39 = targetDistance;
-            
+
+            List<Tuple<float, float>> downRangeData = new List<Tuple<float, float>>();
+
             while (true)
             {
                 UpdateFrame();
+                downRangeData.Add(new Tuple<float, float>(curHorDistance, curAlt));
                 plotter.Render(curFrame, curTime, curHorDistance, curHorDistance39,
                     curAlt, curSpeed, TAStoIAS(curSpeed, curAlt), TAStoMach(curSpeed, curAlt), curAcc, curLiftAcc / 9.81f, curCLReq, curAngle,
                     curTargetDistance1, curTargetDistance2, curTargetDistance39);
@@ -627,7 +630,15 @@ namespace MissileRangeCalculator
                 if (curFrame > 99999) break;
             }
 
+            RenderDownRange(downRangeData);
+
             RenderStatistics();
+        }
+
+        public void RenderDownRange(List<Tuple<float, float>> data)
+        {
+            if (data.Count <= 1) return;
+            plotter.RenderDownRange(data);
         }
 
         public void RenderStatistics()
@@ -712,6 +723,7 @@ namespace MissileRangeCalculator
         bool isFirstFrame = true;
 
         List<PlotData> plotData = new List<PlotData>();
+        List<Tuple<float, float>> downRangeData = new List<Tuple<float, float>>();
 
         public Plotter(PictureBox target, Font font, PictureBox picPlotData, PictureBox picLegends)
         {
@@ -749,6 +761,7 @@ namespace MissileRangeCalculator
 
             isFirstFrame = true;
             plotData.Clear();
+            downRangeData.Clear();
         }
 
         public void SetRenderScale(float s)
@@ -825,6 +838,23 @@ namespace MissileRangeCalculator
             }
 
             graphics.DrawLine(Pens.Black, data.frame - 1, cutoffSpeed * 0.4f * scale, data.frame, cutoffSpeed * 0.4f * scale);
+        }
+
+        public void RenderDownRange(List<Tuple<float, float>> data)
+        {
+            downRangeData = data;
+
+            Pen p = new Pen(Color.White, 1.5f);
+            p.DashPattern = new float[] { 4.0f, 5.0f };
+
+            float maxRange = data[data.Count - 1].Item1;
+            List<PointF> dataPoints = new List<PointF>();
+            for (int i = 0; i < data.Count; ++i)
+            {
+                dataPoints.Add(new PointF(data[i].Item1 / maxRange * data.Count, data[i].Item2 * 0.01f * scale));
+            }
+
+            graphics.DrawCurve(p, dataPoints.ToArray());
         }
 
         public void RenderStatistics(int frame, float time, float alt, float angle, float mach, float speed, float horDistance, float horDistance39, float maxMach, float maxSpeed, float maxAlt)
@@ -911,6 +941,7 @@ namespace MissileRangeCalculator
         }
 
         int prevCheckFrame = -1;
+        int prevCheckFrameDownRangeX = -1;
 
         public void OnClick(int x, int y)
         {
@@ -920,15 +951,26 @@ namespace MissileRangeCalculator
                 plotDataGraphics.DrawString(plotData[x].ToString(), font, Brushes.White, 10f, 10f);
 
                 graphics.DrawLine(new Pen(target.BackColor), prevCheckFrame, 0, prevCheckFrame, target.Height);
+                graphics.DrawLine(new Pen(target.BackColor), prevCheckFrameDownRangeX, 0, prevCheckFrameDownRangeX, target.Height);
 
                 if (prevCheckFrame >= 0 && prevCheckFrame < plotData.Count)
                 {
                     RenderPlotData(plotData[prevCheckFrame], (prevCheckFrame == 0) ? null : plotData[prevCheckFrame - 1]);
                 }
+                if (prevCheckFrameDownRangeX >= 0 && prevCheckFrameDownRangeX < plotData.Count)
+                {
+                    RenderPlotData(plotData[prevCheckFrameDownRangeX], (prevCheckFrameDownRangeX == 0) ? null : plotData[prevCheckFrameDownRangeX - 1]);
+                }
 
                 graphics.DrawLine(Pens.White, x, 0, x, target.Height);
 
+                RenderDownRange(downRangeData);
+                int downRangeX = Math.Min((int)(plotData[x].horDistance / plotData[plotData.Count - 1].horDistance * plotData.Count), plotData.Count -1);
+                int downRangeY = (int)(plotData[x].alt * 0.01f * scale);
+                graphics.DrawLine(Pens.Blue, downRangeX, downRangeY - 10, downRangeX, downRangeY + 10);
+
                 prevCheckFrame = x;
+                prevCheckFrameDownRangeX = downRangeX;
             }
         }
 

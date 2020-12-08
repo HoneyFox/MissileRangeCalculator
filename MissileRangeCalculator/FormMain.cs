@@ -844,17 +844,22 @@ namespace MissileRangeCalculator
         {
             downRangeData = data;
 
-            Pen p = new Pen(Color.White, 1.5f);
-            p.DashPattern = new float[] { 4.0f, 5.0f };
+            Pen p = new Pen(Color.White, 1.25f);
+            p.DashPattern = new float[] { 4.0f, 6.0f };
+            Pen p2 = new Pen(Color.FromArgb(128, 255, 255, 255), 1.25f);
+            p2.DashPattern = new float[] { 4.0f, 6.0f };
 
             float maxRange = data[data.Count - 1].Item1;
             List<PointF> dataPoints = new List<PointF>();
+            List<PointF> dataPointsUniform = new List<PointF>();
             for (int i = 0; i < data.Count; ++i)
             {
                 dataPoints.Add(new PointF(data[i].Item1 / maxRange * data.Count, data[i].Item2 * 0.01f * scale));
+                dataPointsUniform.Add(new PointF(data[i].Item1 / maxRange * data.Count, data[i].Item2 / maxRange * data.Count));
             }
 
             graphics.DrawCurve(p, dataPoints.ToArray());
+            graphics.DrawCurve(p2, dataPointsUniform.ToArray(), 0.5f);
         }
 
         public void RenderStatistics(int frame, float time, float alt, float angle, float mach, float speed, float horDistance, float horDistance39, float maxMach, float maxSpeed, float maxAlt)

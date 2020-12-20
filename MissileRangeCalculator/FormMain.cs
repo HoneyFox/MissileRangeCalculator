@@ -72,8 +72,14 @@ namespace MissileRangeCalculator
             sb.AppendLine(txtInitSpeed.Text).AppendLine(txtInitAlt.Text).AppendLine(txtInitAngle.Text).AppendLine(txtCutoffSpeed.Text);
             sb.AppendLine(txtTargetSpeed.Text).AppendLine(txtTargetDistance.Text).AppendLine(txtCLMax.Text);
             sb.AppendLine(txtDeltaTime.Text).AppendLine(txtDisplayScale.Text);
-            sb.AppendLine(txtMotor.Lines.Length.ToString()).AppendLine(txtMotor.Text);
-            sb.AppendLine(txtPitch.Lines.Length.ToString()).Append(txtPitch.Text);
+            string[] lines = txtMotor.Text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            sb.AppendLine(lines.Length.ToString());
+            foreach (string line in lines)
+                sb.AppendLine(line);
+            lines = txtPitch.Text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            sb.AppendLine(lines.Length.ToString());
+            foreach (string line in lines)
+                sb.AppendLine(line);
             return sb.ToString();
         }
 

@@ -23,7 +23,7 @@ namespace MissileRangeCalculator
 
         private void FormMain_Load(object sender, EventArgs e)
         {
-            plotter = new Plotter(this.picMain, this.Font, this.picPlotData, this.picLegends);
+            plotter = new Plotter(this, this.picMain, this.Font, this.picPlotData, this.picLegends);
             plotter.Clear();
             plotter.RenderLegends();
         }
@@ -48,7 +48,7 @@ namespace MissileRangeCalculator
             picMain.Focus();
             if (simulator != null)
             {
-                plotter.OnClick(e.X, e.Y);
+                plotter.OnClick(e.X, e.Y, e.Button);
                 simulator.RenderStatistics();
                 picMain.Refresh();
                 picPlotData.Refresh();
@@ -106,6 +106,64 @@ namespace MissileRangeCalculator
                 {
                     txtPitch.Text += lines[lineIndex++] + (i < pitchLineCount - 1 ? Environment.NewLine : "");
                 }
+            }
+        }
+
+        public void ShowMotorAndPitchStage(float time)
+        {
+            int motorIndex = -1;
+            int angleRateIndex = -1;
+            List<MotorInfo> motorInfo = MotorInfo.AnalyzeMotorInfo(txtMotor.Text);
+            List<AngleInfo> angleRateInfo = AngleInfo.AnalyzeAngleInfo(txtPitch.Text);
+            for (int i = 0; i < motorInfo.Count; ++i)
+            {
+                if (motorInfo[i].timeStart <= time && motorInfo[i].timeEnd > time)
+                {
+                    motorIndex = i;
+                    break;
+                }
+            }
+            for (int i = 0; i < angleRateInfo.Count; ++i)
+            {
+                if (angleRateInfo[i].timeStart <= time && angleRateInfo[i].timeEnd > time)
+                {
+                    angleRateIndex = i;
+                    break;
+                }
+            }
+            if (motorIndex >= 0)
+            {
+                int lineStart = txtMotor.GetFirstCharIndexFromLine(motorIndex);
+                if (motorIndex < motorInfo.Count - 1)
+                {
+                    int lineEnd = txtMotor.GetFirstCharIndexFromLine(motorIndex + 1) - Environment.NewLine.Length;
+                    txtMotor.Select(lineStart, lineEnd - lineStart);
+                }
+                else
+                {
+                    txtMotor.Select(lineStart, txtMotor.Text.Length - lineStart);
+                }
+            }
+            else
+            {
+                txtMotor.DeselectAll();
+            }
+            if (angleRateIndex >= 0)
+            {
+                int lineStart = txtPitch.GetFirstCharIndexFromLine(angleRateIndex);
+                if (angleRateIndex < angleRateInfo.Count - 1)
+                {
+                    int lineEnd = txtPitch.GetFirstCharIndexFromLine(angleRateIndex + 1) - Environment.NewLine.Length;
+                    txtPitch.Select(lineStart, lineEnd - lineStart);
+                }
+                else
+                {
+                    txtPitch.Select(lineStart, txtPitch.Text.Length - lineStart);
+                }
+            }
+            else
+            {
+                txtPitch.DeselectAll();
             }
         }
 
@@ -715,6 +773,8 @@ namespace MissileRangeCalculator
             }
         }
 
+        FormMain ownerWindow;
+
         PictureBox target;
         Graphics graphics;
         Graphics textGraphics;
@@ -731,8 +791,9 @@ namespace MissileRangeCalculator
         List<PlotData> plotData = new List<PlotData>();
         List<Tuple<float, float>> downRangeData = new List<Tuple<float, float>>();
 
-        public Plotter(PictureBox target, Font font, PictureBox picPlotData, PictureBox picLegends)
+        public Plotter(FormMain ownerWindow, PictureBox target, Font font, PictureBox picPlotData, PictureBox picLegends)
         {
+            this.ownerWindow = ownerWindow;
             this.target = target;
             this.font = font;
             this.picPlotData = picPlotData;
@@ -954,10 +1015,27 @@ namespace MissileRangeCalculator
         int prevCheckFrame = -1;
         int prevCheckFrameDownRangeX = -1;
 
-        public void OnClick(int x, int y)
+        public int OnClick(int x, int y, MouseButtons button = MouseButtons.Left)
         {
             if (x >= 0 && x < plotData.Count)
             {
+                if (button == MouseButtons.Right)
+                {
+                    float horDistance = x * plotData[plotData.Count - 1].horDistance / (plotData.Count - 1);
+                    int closestIndex = -1;
+                    float closestDistance = float.MaxValue;
+                    for (int i = 0; i < plotData.Count; ++i)
+                    {
+                        float distanceError = Math.Abs(plotData[i].horDistance - horDistance);
+                        if (distanceError < closestDistance)
+                        {
+                            closestIndex = i;
+                            closestDistance = distanceError;
+                        }
+                    }
+                    x = closestIndex;
+                }
+
                 plotDataGraphics.Clear(Color.DarkBlue);
                 plotDataGraphics.DrawString(plotData[x].ToString(), font, Brushes.White, 10f, 10f);
 
@@ -976,12 +1054,21 @@ namespace MissileRangeCalculator
                 graphics.DrawLine(Pens.White, x, 0, x, target.Height);
 
                 RenderDownRange(downRangeData);
-                int downRangeX = Math.Min((int)(plotData[x].horDistance / plotData[plotData.Count - 1].horDistance * plotData.Count), plotData.Count -1);
+                int downRangeX = Math.Min((int)(plotData[x].horDistance / plotData[plotData.Count - 1].horDistance * plotData.Count), plotData.Count - 1);
                 int downRangeY = (int)(plotData[x].alt * 0.01f * scale);
                 graphics.DrawLine(Pens.Blue, downRangeX, downRangeY - 10, downRangeX, downRangeY + 10);
 
                 prevCheckFrame = x;
                 prevCheckFrameDownRangeX = downRangeX;
+
+                ownerWindow.ShowMotorAndPitchStage(plotData[x].time);
+
+                return x;
+            }
+            else
+            {
+                ownerWindow.ShowMotorAndPitchStage(-1);
+                return -1;
             }
         }
 

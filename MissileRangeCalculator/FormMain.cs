@@ -259,10 +259,22 @@ namespace MissileRangeCalculator
                 string[] components = lines[i].Split(',');
                 float time = float.Parse(components[0]);
                 float propellantMass = float.Parse(components[1]);
-                float isp = float.Parse(components[2]);
-                float thrust = propellantMass / time * isp * 9.81f;
+                float thrustStart, thrustEnd;
+                if (components[2].Contains("~"))
+                {
+                    string[] isps = components[2].Split('~');
+                    float ispStart = float.Parse(isps[0]);
+                    float ispEnd = float.Parse(isps[1]);
+                    thrustStart = propellantMass / time * ispStart * 9.81f;
+                    thrustEnd = propellantMass / time * ispEnd * 9.81f;
+                }
+                else
+                {
+                    float isp = float.Parse(components[2]);
+                    thrustStart = thrustEnd = propellantMass / time * isp * 9.81f;
+                }
 
-                motorInfo.Add(new MotorInfo(timeElapsed, timeElapsed + time, thrust, totalPropellantMass, totalPropellantMass - propellantMass));
+                motorInfo.Add(new MotorInfo(timeElapsed, timeElapsed + time, thrustStart, thrustEnd, totalPropellantMass, totalPropellantMass - propellantMass));
                 timeElapsed += time;
                 totalPropellantMass -= propellantMass;
             }
@@ -273,15 +285,17 @@ namespace MissileRangeCalculator
 
         public float timeStart;
         public float timeEnd;
-        public float thrust;
+        public float thrustStart;
+        public float thrustEnd;
         public float propellantMassStart;
         public float propellantMassEnd;
 
-        public MotorInfo(float timeStart, float timeEnd, float thrust, float propellantMassStart, float propellantMassEnd)
+        public MotorInfo(float timeStart, float timeEnd, float thrustStart, float thrustEnd, float propellantMassStart, float propellantMassEnd)
         {
             this.timeStart = timeStart;
             this.timeEnd = timeEnd;
-            this.thrust = thrust;
+            this.thrustStart = thrustStart;
+            this.thrustEnd = thrustEnd;
             this.propellantMassStart = propellantMassStart;
             this.propellantMassEnd = propellantMassEnd;
         }
@@ -418,7 +432,7 @@ namespace MissileRangeCalculator
             {
                 if (motorInfo[i].timeStart <= time && motorInfo[i].timeEnd > time)
                 {
-                    return motorInfo[i].thrust;
+                    return motorInfo[i].thrustStart + (motorInfo[i].thrustEnd - motorInfo[i].thrustStart) * (time - motorInfo[i].timeStart) / (motorInfo[i].timeEnd - motorInfo[i].timeStart);
                 }
             }
 

@@ -312,24 +312,42 @@ namespace MissileRangeCalculator
             string[] lines = text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < lines.Length; ++i)
             {
-                string[] components = lines[i].Split(',');
+                string[] components = lines[i].Split( new char[] { ',' }, StringSplitOptions.None);
                 float time = float.Parse(components[0]);
                 bool useLiftG = components[1].EndsWith("g", StringComparison.InvariantCultureIgnoreCase);
-                if (components.Length == 2)
+
+                bool useTargetAngle = false;
+                float targetAngle = 0;
+                if (components.Length >= 3)
                 {
-                    if (useLiftG)
-                        angleInfo.Add(new AngleInfo(timeElapsed, timeElapsed + time, 0, true, float.Parse(components[1].TrimEnd('g', 'G')), false, 0));
-                    else
-                        angleInfo.Add(new AngleInfo(timeElapsed, timeElapsed + time, float.Parse(components[1]), false, 0, false, 0));
+                    if(components[2] != "")
+                    {
+                        useTargetAngle = true;
+                        targetAngle = float.Parse(components[2]);
+                    }
                 }
+
+                float engineStartAngle = 0;
+                float engineEndAngle = 0;
+                if (components.Length == 4)
+                {
+                    if (components[3].Contains("~"))
+                {
+                        var range = components[3].Split('~');
+                        engineStartAngle = float.Parse(range[0]);
+                        engineEndAngle = float.Parse(range[1]);
+                    }
+                    else
+                    {
+                        engineStartAngle = engineEndAngle = float.Parse(components[3]);
+                    }
+                }
+
+                if (useLiftG)
+                    angleInfo.Add(new AngleInfo(timeElapsed, timeElapsed + time, 0, true, float.Parse(components[1].TrimEnd('g', 'G')), useTargetAngle, targetAngle, engineStartAngle, engineEndAngle));
                 else
-                {
-                    float targetAngle = float.Parse(components[2]);
-                    if (useLiftG)
-                        angleInfo.Add(new AngleInfo(timeElapsed, timeElapsed + time, 0, true, float.Parse(components[1].TrimStart('-').TrimEnd('g', 'G')), true, targetAngle));
-                    else
-                        angleInfo.Add(new AngleInfo(timeElapsed, timeElapsed + time, float.Parse(components[1].TrimStart('-')), false, 0, true, targetAngle));
-                }
+                    angleInfo.Add(new AngleInfo(timeElapsed, timeElapsed + time, float.Parse(components[1]), false, 0, useTargetAngle, targetAngle, engineStartAngle, engineEndAngle));
+                
                 timeElapsed += time;
             }
 
@@ -343,8 +361,10 @@ namespace MissileRangeCalculator
         public float liftG;
         public bool useTargetAngle;
         public float targetAngle;
+        public float engineStartAngle;
+        public float engineEndAngle;
 
-        public AngleInfo(float timeStart, float timeEnd, float angleRate, bool useLiftG, float liftG, bool useTargetAngle, float targetAngle)
+        public AngleInfo(float timeStart, float timeEnd, float angleRate, bool useLiftG, float liftG, bool useTargetAngle, float targetAngle, float engineStartAngle, float engineEndAngle)
         {
             this.timeStart = timeStart;
             this.timeEnd = timeEnd;
@@ -353,6 +373,8 @@ namespace MissileRangeCalculator
             this.liftG = liftG;
             this.useTargetAngle = useTargetAngle;
             this.targetAngle = targetAngle;
+            this.engineStartAngle = engineStartAngle;
+            this.engineEndAngle = engineEndAngle;
         }
     }
 
@@ -439,6 +461,19 @@ namespace MissileRangeCalculator
             return 0f;
         }
 
+        public float GetEngineAngle(float time)
+        {
+            for (int i = 0; i < angleRateInfo.Count; ++i)
+            {
+                if (angleRateInfo[i].timeStart <= time && angleRateInfo[i].timeEnd > time)
+                {
+                    return angleRateInfo[i].engineStartAngle + (angleRateInfo[i].engineEndAngle - angleRateInfo[i].engineStartAngle) * (time - angleRateInfo[i].timeStart) / (angleRateInfo[i].timeEnd - angleRateInfo[i].timeStart);
+                }
+            }
+
+            return 0f;
+        }
+
         public float GetMass(float time)
         {
             for (int i = 0; i < motorInfo.Count; ++i)
@@ -484,7 +519,7 @@ namespace MissileRangeCalculator
                     if (curSpeed > 0)
                     {
                         float originalAngle = curAngle;
-                        float gravityAngleRate = (float)(-accForStraightFlight / curSpeed * 180 / Math.PI);
+                        float gravityAngleRate = (float)(-accForStraightFlight / curSpeed * 180 / Math.PI) + (float)(Math.Cos(curAngle * Math.PI / 180f) * Math.Sin(GetEngineAngle(time) * Math.PI / 180f) * GetThrust(time) / mass / curSpeed * 180 / Math.PI);
                         curAngle += gravityAngleRate * deltaTime;
                                 
                         float maxLiftAcc = GetMaxLiftForce() / mass;
@@ -622,7 +657,7 @@ namespace MissileRangeCalculator
             float drag0 = GetDragCoeff(TAStoMach(curSpeed, curAlt)) * refArea * dynPressure;
             float accForStraightFlight = (float)(Math.Cos(curAngle * Math.PI / 180f) * GetNetG());
             float curAcc = angleRate * curSpeed;
-            liftAcc = (curAcc + accForStraightFlight);
+            liftAcc = (curAcc + accForStraightFlight - (float)(Math.Cos(curAngle * Math.PI / 180f) * Math.Sin(GetEngineAngle(curTime) * Math.PI / 180f) * GetThrust(curTime) / mass));
             float liftForce = liftAcc * mass;
             float dragL = 0f;
             if (dynPressure > 0)
@@ -662,7 +697,8 @@ namespace MissileRangeCalculator
             float curMass = GetMass(curTime);
             float newAngle = UpdatePitchAngle(curTime, deltaTime, curMass);
             float deltaAngle = newAngle - curAngle;
-            curAcc = (GetThrust(curTime) - CalculateDrag((float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, out curLiftAcc, out curCLReq)) / curMass - (float)(GetLocalG() * Math.Sin(curAngle * Math.PI / 180f));
+            float engineAngle = GetEngineAngle(curTime);
+            curAcc = (GetThrust(curTime) * (float)Math.Cos(engineAngle * Math.PI / 180f) - CalculateDrag((float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, out curLiftAcc, out curCLReq)) / curMass - (float)(GetLocalG() * Math.Sin(curAngle * Math.PI / 180f));
             curAngle = newAngle;
             curSpeed = curSpeed + curAcc * deltaTime;
             curHorDistance += curSpeed * (float)(Math.Cos(curAngle * Math.PI / 180f)) * deltaTime;

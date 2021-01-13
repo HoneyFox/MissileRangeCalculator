@@ -76,130 +76,130 @@
             // 
             // txtSubsonicDrag
             // 
-            this.txtSubsonicDrag.Location = new System.Drawing.Point(35, 6);
+            this.txtSubsonicDrag.Location = new System.Drawing.Point(35, 7);
             this.txtSubsonicDrag.Name = "txtSubsonicDrag";
-            this.txtSubsonicDrag.Size = new System.Drawing.Size(33, 21);
+            this.txtSubsonicDrag.Size = new System.Drawing.Size(33, 20);
             this.txtSubsonicDrag.TabIndex = 0;
             this.txtSubsonicDrag.Text = "0.2";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 10);
+            this.label1.Location = new System.Drawing.Point(13, 11);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(17, 12);
+            this.label1.Size = new System.Drawing.Size(22, 13);
             this.label1.TabIndex = 1;
             this.label1.Text = "CD";
             // 
             // txtSupersonicDrag
             // 
-            this.txtSupersonicDrag.Location = new System.Drawing.Point(74, 6);
+            this.txtSupersonicDrag.Location = new System.Drawing.Point(74, 7);
             this.txtSupersonicDrag.Name = "txtSupersonicDrag";
-            this.txtSupersonicDrag.Size = new System.Drawing.Size(33, 21);
+            this.txtSupersonicDrag.Size = new System.Drawing.Size(33, 20);
             this.txtSupersonicDrag.TabIndex = 2;
             this.txtSupersonicDrag.Text = "0.4";
             // 
             // txtMotor
             // 
             this.txtMotor.HideSelection = false;
-            this.txtMotor.Location = new System.Drawing.Point(12, 58);
+            this.txtMotor.Location = new System.Drawing.Point(12, 63);
             this.txtMotor.Multiline = true;
             this.txtMotor.Name = "txtMotor";
-            this.txtMotor.Size = new System.Drawing.Size(156, 136);
+            this.txtMotor.Size = new System.Drawing.Size(156, 147);
             this.txtMotor.TabIndex = 3;
             this.txtMotor.Text = "7.5,50,276";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(152, 10);
+            this.label2.Location = new System.Drawing.Point(152, 11);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(47, 12);
+            this.label2.Size = new System.Drawing.Size(48, 13);
             this.label2.TabIndex = 4;
             this.label2.Text = "DryMass";
             // 
             // txtDryMass
             // 
-            this.txtDryMass.Location = new System.Drawing.Point(205, 6);
+            this.txtDryMass.Location = new System.Drawing.Point(205, 7);
             this.txtDryMass.Name = "txtDryMass";
-            this.txtDryMass.Size = new System.Drawing.Size(46, 21);
+            this.txtDryMass.Size = new System.Drawing.Size(46, 20);
             this.txtDryMass.TabIndex = 5;
             this.txtDryMass.Text = "100";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(257, 10);
+            this.label3.Location = new System.Drawing.Point(257, 11);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(53, 12);
+            this.label3.Size = new System.Drawing.Size(49, 13);
             this.label3.TabIndex = 6;
             this.label3.Text = "Diameter";
             // 
             // txtDiameter
             // 
-            this.txtDiameter.Location = new System.Drawing.Point(316, 6);
+            this.txtDiameter.Location = new System.Drawing.Point(316, 7);
             this.txtDiameter.Name = "txtDiameter";
-            this.txtDiameter.Size = new System.Drawing.Size(56, 21);
+            this.txtDiameter.Size = new System.Drawing.Size(56, 20);
             this.txtDiameter.TabIndex = 7;
             this.txtDiameter.Text = "0.18";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(378, 10);
+            this.label4.Location = new System.Drawing.Point(378, 11);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(77, 12);
+            this.label4.Size = new System.Drawing.Size(62, 13);
             this.label4.TabIndex = 8;
             this.label4.Text = "InitialSpeed";
             // 
             // txtInitSpeed
             // 
-            this.txtInitSpeed.Location = new System.Drawing.Point(458, 6);
+            this.txtInitSpeed.Location = new System.Drawing.Point(458, 7);
             this.txtInitSpeed.Name = "txtInitSpeed";
-            this.txtInitSpeed.Size = new System.Drawing.Size(56, 21);
+            this.txtInitSpeed.Size = new System.Drawing.Size(56, 20);
             this.txtInitSpeed.TabIndex = 9;
             this.txtInitSpeed.Text = "300";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(520, 10);
+            this.label5.Location = new System.Drawing.Point(520, 11);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(65, 12);
+            this.label5.Size = new System.Drawing.Size(43, 13);
             this.label5.TabIndex = 10;
             this.label5.Text = "InitialAlt";
             // 
             // txtInitAlt
             // 
-            this.txtInitAlt.Location = new System.Drawing.Point(591, 6);
+            this.txtInitAlt.Location = new System.Drawing.Point(591, 7);
             this.txtInitAlt.Name = "txtInitAlt";
-            this.txtInitAlt.Size = new System.Drawing.Size(66, 21);
+            this.txtInitAlt.Size = new System.Drawing.Size(66, 20);
             this.txtInitAlt.TabIndex = 11;
             this.txtInitAlt.Text = "8000";
             // 
             // txtCutoffSpeed
             // 
-            this.txtCutoffSpeed.Location = new System.Drawing.Point(866, 7);
+            this.txtCutoffSpeed.Location = new System.Drawing.Point(866, 8);
             this.txtCutoffSpeed.Name = "txtCutoffSpeed";
-            this.txtCutoffSpeed.Size = new System.Drawing.Size(56, 21);
+            this.txtCutoffSpeed.Size = new System.Drawing.Size(56, 20);
             this.txtCutoffSpeed.TabIndex = 12;
             this.txtCutoffSpeed.Text = "500";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(789, 9);
+            this.label6.Location = new System.Drawing.Point(789, 10);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(71, 12);
+            this.label6.Size = new System.Drawing.Size(66, 13);
             this.label6.TabIndex = 13;
             this.label6.Text = "CutoffSpeed";
             // 
             // btnSimulate
             // 
             this.btnSimulate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSimulate.Location = new System.Drawing.Point(927, 30);
+            this.btnSimulate.Location = new System.Drawing.Point(927, 33);
             this.btnSimulate.Name = "btnSimulate";
-            this.btnSimulate.Size = new System.Drawing.Size(110, 23);
+            this.btnSimulate.Size = new System.Drawing.Size(110, 22);
             this.btnSimulate.TabIndex = 14;
             this.btnSimulate.Text = "Simulate";
             this.btnSimulate.UseVisualStyleBackColor = true;
@@ -208,26 +208,26 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(13, 36);
+            this.label7.Location = new System.Drawing.Point(13, 39);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(155, 12);
+            this.label7.Size = new System.Drawing.Size(98, 13);
             this.label7.TabIndex = 15;
-            this.label7.Text = "Time, PropellantMass, Isp";
+            this.label7.Text = "T, Propellant m, Isp";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(663, 10);
+            this.label8.Location = new System.Drawing.Point(663, 11);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(77, 12);
+            this.label8.Size = new System.Drawing.Size(58, 13);
             this.label8.TabIndex = 16;
             this.label8.Text = "InitialAngle";
             // 
             // txtInitAngle
             // 
-            this.txtInitAngle.Location = new System.Drawing.Point(746, 6);
+            this.txtInitAngle.Location = new System.Drawing.Point(746, 7);
             this.txtInitAngle.Name = "txtInitAngle";
-            this.txtInitAngle.Size = new System.Drawing.Size(37, 21);
+            this.txtInitAngle.Size = new System.Drawing.Size(37, 20);
             this.txtInitAngle.TabIndex = 17;
             this.txtInitAngle.Text = "30";
             // 
@@ -237,9 +237,9 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.picMain.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.picMain.Location = new System.Drawing.Point(180, 58);
+            this.picMain.Location = new System.Drawing.Point(180, 63);
             this.picMain.Name = "picMain";
-            this.picMain.Size = new System.Drawing.Size(742, 545);
+            this.picMain.Size = new System.Drawing.Size(742, 590);
             this.picMain.TabIndex = 18;
             this.picMain.TabStop = false;
             this.picMain.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picMain_MouseDown);
@@ -247,55 +247,55 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(13, 208);
+            this.label9.Location = new System.Drawing.Point(13, 225);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(155, 12);
+            this.label9.Size = new System.Drawing.Size(135, 13);
             this.label9.TabIndex = 19;
-            this.label9.Text = "Time, AngleRate/G, Target";
+            this.label9.Text = "T, ω/G, Target θ, Engine δ";
             // 
             // txtPitch
             // 
             this.txtPitch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.txtPitch.HideSelection = false;
-            this.txtPitch.Location = new System.Drawing.Point(12, 228);
+            this.txtPitch.Location = new System.Drawing.Point(12, 247);
             this.txtPitch.Multiline = true;
             this.txtPitch.Name = "txtPitch";
-            this.txtPitch.Size = new System.Drawing.Size(156, 126);
+            this.txtPitch.Size = new System.Drawing.Size(156, 136);
             this.txtPitch.TabIndex = 20;
             this.txtPitch.Text = "10,0\r\n10,-0.7\r\n20,-0.8\r\n90,-0.5";
             // 
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(190, 36);
+            this.label10.Location = new System.Drawing.Point(190, 39);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(71, 12);
+            this.label10.Size = new System.Drawing.Size(69, 13);
             this.label10.TabIndex = 21;
             this.label10.Text = "TargetSpeed";
             // 
             // txtTargetSpeed
             // 
-            this.txtTargetSpeed.Location = new System.Drawing.Point(267, 31);
+            this.txtTargetSpeed.Location = new System.Drawing.Point(267, 34);
             this.txtTargetSpeed.Name = "txtTargetSpeed";
-            this.txtTargetSpeed.Size = new System.Drawing.Size(56, 21);
+            this.txtTargetSpeed.Size = new System.Drawing.Size(56, 20);
             this.txtTargetSpeed.TabIndex = 22;
             this.txtTargetSpeed.Text = "400";
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(329, 36);
+            this.label11.Location = new System.Drawing.Point(329, 39);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(89, 12);
+            this.label11.Size = new System.Drawing.Size(80, 13);
             this.label11.TabIndex = 23;
             this.label11.Text = "TargetDistance";
             // 
             // txtTargetDistance
             // 
-            this.txtTargetDistance.Location = new System.Drawing.Point(424, 31);
+            this.txtTargetDistance.Location = new System.Drawing.Point(424, 34);
             this.txtTargetDistance.Name = "txtTargetDistance";
-            this.txtTargetDistance.Size = new System.Drawing.Size(90, 21);
+            this.txtTargetDistance.Size = new System.Drawing.Size(90, 20);
             this.txtTargetDistance.TabIndex = 24;
             this.txtTargetDistance.Text = "45000";
             // 
@@ -303,18 +303,18 @@
             // 
             this.label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(659, 36);
+            this.label12.Location = new System.Drawing.Point(659, 39);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(53, 12);
+            this.label12.Size = new System.Drawing.Size(52, 13);
             this.label12.TabIndex = 25;
             this.label12.Text = "TimeStep";
             // 
             // txtDeltaTime
             // 
             this.txtDeltaTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDeltaTime.Location = new System.Drawing.Point(718, 31);
+            this.txtDeltaTime.Location = new System.Drawing.Point(718, 34);
             this.txtDeltaTime.Name = "txtDeltaTime";
-            this.txtDeltaTime.Size = new System.Drawing.Size(66, 21);
+            this.txtDeltaTime.Size = new System.Drawing.Size(66, 20);
             this.txtDeltaTime.TabIndex = 26;
             this.txtDeltaTime.Text = "0.25";
             // 
@@ -322,26 +322,26 @@
             // 
             this.label13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(790, 36);
+            this.label13.Location = new System.Drawing.Point(790, 39);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(77, 12);
+            this.label13.Size = new System.Drawing.Size(68, 13);
             this.label13.TabIndex = 27;
             this.label13.Text = "DisplayScale";
             // 
             // txtDisplayScale
             // 
             this.txtDisplayScale.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDisplayScale.Location = new System.Drawing.Point(873, 31);
+            this.txtDisplayScale.Location = new System.Drawing.Point(873, 34);
             this.txtDisplayScale.Name = "txtDisplayScale";
-            this.txtDisplayScale.Size = new System.Drawing.Size(49, 21);
+            this.txtDisplayScale.Size = new System.Drawing.Size(49, 20);
             this.txtDisplayScale.TabIndex = 28;
             this.txtDisplayScale.Text = "0.5";
             // 
             // txtInducedDragFactor
             // 
-            this.txtInducedDragFactor.Location = new System.Drawing.Point(113, 6);
+            this.txtInducedDragFactor.Location = new System.Drawing.Point(113, 7);
             this.txtInducedDragFactor.Name = "txtInducedDragFactor";
-            this.txtInducedDragFactor.Size = new System.Drawing.Size(33, 21);
+            this.txtInducedDragFactor.Size = new System.Drawing.Size(33, 20);
             this.txtInducedDragFactor.TabIndex = 29;
             this.txtInducedDragFactor.Text = "0.08";
             // 
@@ -350,9 +350,9 @@
             this.picPlotData.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.picPlotData.BackColor = System.Drawing.Color.DarkBlue;
             this.picPlotData.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.picPlotData.Location = new System.Drawing.Point(12, 366);
+            this.picPlotData.Location = new System.Drawing.Point(12, 397);
             this.picPlotData.Name = "picPlotData";
-            this.picPlotData.Size = new System.Drawing.Size(156, 237);
+            this.picPlotData.Size = new System.Drawing.Size(156, 257);
             this.picPlotData.TabIndex = 30;
             this.picPlotData.TabStop = false;
             // 
@@ -361,35 +361,35 @@
             this.picLegends.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.picLegends.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.picLegends.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.picLegends.Location = new System.Drawing.Point(928, 58);
+            this.picLegends.Location = new System.Drawing.Point(928, 63);
             this.picLegends.Name = "picLegends";
-            this.picLegends.Size = new System.Drawing.Size(108, 272);
+            this.picLegends.Size = new System.Drawing.Size(108, 295);
             this.picLegends.TabIndex = 31;
             this.picLegends.TabStop = false;
             // 
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(520, 36);
+            this.label14.Location = new System.Drawing.Point(520, 39);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(41, 12);
+            this.label14.Size = new System.Drawing.Size(43, 13);
             this.label14.TabIndex = 32;
             this.label14.Text = "CL Max";
             // 
             // txtCLMax
             // 
-            this.txtCLMax.Location = new System.Drawing.Point(567, 31);
+            this.txtCLMax.Location = new System.Drawing.Point(567, 34);
             this.txtCLMax.Name = "txtCLMax";
-            this.txtCLMax.Size = new System.Drawing.Size(56, 21);
+            this.txtCLMax.Size = new System.Drawing.Size(56, 20);
             this.txtCLMax.TabIndex = 33;
             this.txtCLMax.Text = "2.4";
             // 
             // btnPaste
             // 
             this.btnPaste.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnPaste.Location = new System.Drawing.Point(928, 582);
+            this.btnPaste.Location = new System.Drawing.Point(928, 631);
             this.btnPaste.Name = "btnPaste";
-            this.btnPaste.Size = new System.Drawing.Size(109, 20);
+            this.btnPaste.Size = new System.Drawing.Size(109, 22);
             this.btnPaste.TabIndex = 34;
             this.btnPaste.Text = "Paste";
             this.btnPaste.UseVisualStyleBackColor = true;
@@ -398,9 +398,9 @@
             // btnCopy
             // 
             this.btnCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCopy.Location = new System.Drawing.Point(928, 556);
+            this.btnCopy.Location = new System.Drawing.Point(928, 602);
             this.btnCopy.Name = "btnCopy";
-            this.btnCopy.Size = new System.Drawing.Size(109, 20);
+            this.btnCopy.Size = new System.Drawing.Size(109, 22);
             this.btnCopy.TabIndex = 35;
             this.btnCopy.Text = "Copy";
             this.btnCopy.UseVisualStyleBackColor = true;
@@ -409,9 +409,9 @@
             // btnSaveAs
             // 
             this.btnSaveAs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSaveAs.Location = new System.Drawing.Point(928, 530);
+            this.btnSaveAs.Location = new System.Drawing.Point(928, 574);
             this.btnSaveAs.Name = "btnSaveAs";
-            this.btnSaveAs.Size = new System.Drawing.Size(109, 20);
+            this.btnSaveAs.Size = new System.Drawing.Size(109, 22);
             this.btnSaveAs.TabIndex = 36;
             this.btnSaveAs.Text = "Save As...";
             this.btnSaveAs.UseVisualStyleBackColor = true;
@@ -430,9 +430,9 @@
             // btnOpen
             // 
             this.btnOpen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnOpen.Location = new System.Drawing.Point(928, 504);
+            this.btnOpen.Location = new System.Drawing.Point(928, 546);
             this.btnOpen.Name = "btnOpen";
-            this.btnOpen.Size = new System.Drawing.Size(109, 20);
+            this.btnOpen.Size = new System.Drawing.Size(109, 22);
             this.btnOpen.TabIndex = 37;
             this.btnOpen.Text = "Open...";
             this.btnOpen.UseVisualStyleBackColor = true;
@@ -441,9 +441,9 @@
             // FormMain
             // 
             this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1044, 611);
+            this.ClientSize = new System.Drawing.Size(1044, 662);
             this.Controls.Add(this.btnOpen);
             this.Controls.Add(this.btnSaveAs);
             this.Controls.Add(this.btnCopy);
@@ -484,7 +484,7 @@
             this.Controls.Add(this.txtSubsonicDrag);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
-            this.MinimumSize = new System.Drawing.Size(1060, 650);
+            this.MinimumSize = new System.Drawing.Size(1060, 701);
             this.Name = "FormMain";
             this.Text = "Missie Range Calculator";
             this.Load += new System.EventHandler(this.FormMain_Load);

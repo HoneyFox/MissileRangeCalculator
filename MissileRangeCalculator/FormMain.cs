@@ -26,6 +26,13 @@ namespace MissileRangeCalculator
             plotter = new Plotter(this, this.picMain, this.Font, this.picPlotData, this.picLegends);
             plotter.Clear();
             plotter.RenderLegends();
+
+            string[] parameters = Environment.CommandLine.Split(new char[]{' '}, StringSplitOptions.RemoveEmptyEntries);
+            if (parameters.Length == 2)
+            {
+                string filePath = parameters[1].Trim('"');
+                ParseInfo(File.ReadAllText(filePath));
+            }
         }
 
         private void btnSimulate_Click(object sender, EventArgs e)

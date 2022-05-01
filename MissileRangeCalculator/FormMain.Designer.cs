@@ -1,4 +1,7 @@
-﻿namespace MissileRangeCalculator
+﻿using System;
+using System.Windows.Forms;
+
+namespace MissileRangeCalculator
 {
     partial class FormMain
     {
@@ -108,6 +111,7 @@
             this.txtMotor.Size = new System.Drawing.Size(156, 136);
             this.txtMotor.TabIndex = 3;
             this.txtMotor.Text = "7.5,50,276";
+            this.txtMotor.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.txtMotor_MouseWheel);
             // 
             // label2
             // 
@@ -210,9 +214,9 @@
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(13, 36);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(113, 12);
+            this.label7.Size = new System.Drawing.Size(101, 12);
             this.label7.TabIndex = 15;
-            this.label7.Text = "T,Propellant m,Isp";
+            this.label7.Text = "T,m,Isp/IspRange";
             // 
             // label8
             // 
@@ -264,6 +268,7 @@
             this.txtPitch.Size = new System.Drawing.Size(156, 126);
             this.txtPitch.TabIndex = 20;
             this.txtPitch.Text = "10,0\r\n10,-0.7\r\n20,-0.8\r\n90,-0.5";
+            this.txtPitch.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.txtPitch_MouseWheel);
             // 
             // label10
             // 
@@ -488,8 +493,13 @@
             this.Name = "FormMain";
             this.Text = "Missie Range Calculator";
             this.Load += new System.EventHandler(this.FormMain_Load);
+            this.ResizeBegin += new System.EventHandler(this.FormMain_ResizeBegin);
+            this.ResizeEnd += new System.EventHandler(this.FormMain_ResizeEnd);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.FormMain_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.FormMain_DragEnter);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FormMain_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.FormMain_KeyUp);
+            this.Resize += new System.EventHandler(this.FormMain_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.picMain)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPlotData)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picLegends)).EndInit();
@@ -497,7 +507,6 @@
             this.PerformLayout();
 
         }
-
         #endregion
 
         private System.Windows.Forms.TextBox txtSubsonicDrag;

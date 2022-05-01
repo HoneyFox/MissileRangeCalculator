@@ -14,7 +14,10 @@ namespace MissileRangeCalculator
     public partial class FormMain : Form
     {
         Plotter plotter;
-        Simulator simulator;
+        internal Simulator simulator;
+
+        internal bool isShiftDown;
+        internal bool isCtrlDown;
 
         public FormMain()
         {
@@ -30,6 +33,13 @@ namespace MissileRangeCalculator
 
         private void btnSimulate_Click(object sender, EventArgs e)
         {
+            plotter.prevCheckFrame = -1;
+            plotter.prevCheckFrameDownRangeX = -1;
+            Simulate();
+        }
+
+        private void Simulate()
+        { 
             List<MotorInfo> motorInfo = MotorInfo.AnalyzeMotorInfo(txtMotor.Text);
             List<AngleInfo> angleRateInfo = AngleInfo.AnalyzeAngleInfo(txtPitch.Text);
            
@@ -43,6 +53,64 @@ namespace MissileRangeCalculator
             simulator.Simulate();
         }
 
+        private string AdjustTimeValue(string input, int delta, int adjustment)
+        {
+            string[] components = input.Split(new char[] { ',' });
+            if (components[0].Contains("."))
+            {
+                double timeValue;
+                if (double.TryParse(components[0], out timeValue))
+                {
+                    int digits = components[0].Split(new char[] { '.' })[1].Length;
+                    double newValue = Math.Max(0.0, timeValue + Math.Sign(delta) * adjustment);
+                    components[0] = newValue.ToString("f" + digits.ToString());
+                }
+            }
+            else
+            {
+                int timeValue;
+                if (int.TryParse(components[0], out timeValue))
+                {
+                    int newValue = Math.Max(0, timeValue + (int)Math.Sign(delta) * adjustment);
+                    components[0] = newValue.ToString();
+                }
+            }
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < components.Length; ++i)
+            {
+                sb.Append(components[i]);
+                if (i < components.Length - 1)
+                    sb.Append(",");
+            }
+            return sb.ToString();
+        }
+
+        private void txtPitch_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (e.Delta != 0)
+            {
+                if (txtPitch.SelectedText != "" && (this.isShiftDown || this.isCtrlDown))
+                {
+                    txtPitch.SelectedText = AdjustTimeValue(txtPitch.SelectedText, e.Delta, this.isCtrlDown ? 1 : (this.isShiftDown ? 50 : 10));
+                    Simulate();
+                    picMain_MouseDown(this, new MouseEventArgs(MouseButtons.Left, 1, simulator.plotter.prevCheckFrame, 0, 0));
+                }
+            }
+        }
+
+        private void txtMotor_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (e.Delta != 0)
+            {
+                if (txtMotor.SelectedText != "" && (this.isShiftDown || this.isCtrlDown))
+                {
+                    txtMotor.SelectedText = AdjustTimeValue(txtMotor.SelectedText, e.Delta, this.isCtrlDown ? 1 : (this.isShiftDown ? 50 : 10));
+                    Simulate();
+                    picMain_MouseDown(this, new MouseEventArgs(MouseButtons.Left, 1, simulator.plotter.prevCheckFrame, 0, 0));
+                }
+            }
+        }
+
         private void picMain_MouseDown(object sender, MouseEventArgs e)
         {
             picMain.Focus();
@@ -54,10 +122,12 @@ namespace MissileRangeCalculator
                 picPlotData.Refresh();
             }
         }
+
         private void btnCopy_Click(object sender, EventArgs e)
         {
             Clipboard.SetText(GenerateInfo());
         }
+
         private void btnPaste_Click(object sender, EventArgs e)
         {
             ParseInfo(Clipboard.GetText());
@@ -193,10 +263,18 @@ namespace MissileRangeCalculator
 
         private void FormMain_KeyDown(object sender, KeyEventArgs e)
         {
-            if (simulator != null && (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right))
-            {
-                plotter.OnSlide(e.KeyCode == Keys.Left ? -1 : 1);
-            }
+            if (this.isShiftDown == false && e.KeyValue == 16)
+                this.isShiftDown = true;
+            if (this.isCtrlDown == false && e.KeyValue == 17)
+                this.isCtrlDown = true;
+        }
+
+        private void FormMain_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (this.isShiftDown == true && e.KeyValue == 16)
+                this.isShiftDown = false;
+            if (this.isCtrlDown == true && e.KeyValue == 17)
+                this.isCtrlDown = false;
         }
 
         private void btnOpen_Click(object sender, EventArgs e)
@@ -235,6 +313,42 @@ namespace MissileRangeCalculator
             if (files.Length == 1)
                 ParseInfo(File.ReadAllText(files[0]));
         }
+
+        bool isResizing = false;
+
+        private void FormMain_ResizeBegin(object sender, EventArgs e)
+        {
+            isResizing = true;
+        }
+
+        private void FormMain_ResizeEnd(object sender, EventArgs e)
+        {
+            isResizing = false;
+            // Call OnResizeCompleted() when dragging window border is completed.
+            OnResizeCompleted();
+        }
+
+        private void FormMain_Resize(object sender, EventArgs e)
+        {
+            // If it's dragging window border, do not call OnResizeCompleted().
+            if (isResizing) return;
+            OnResizeCompleted();
+        }
+
+        private void OnResizeCompleted()
+        {
+            int lastCheckFrame = -1;
+            if (this.simulator.plotter != null)
+            {
+                lastCheckFrame = this.simulator.plotter.prevCheckFrame;
+            }
+            Simulate();
+            if (lastCheckFrame != -1)
+            {
+                this.picMain_MouseDown(this, new MouseEventArgs(MouseButtons.Left, 1, lastCheckFrame, 1, 0));
+            }
+        }
+
     }
 
     public class MotorInfo
@@ -399,7 +513,7 @@ namespace MissileRangeCalculator
 
     public class Simulator
     {
-        private Plotter plotter;
+        public Plotter plotter;
 
         float deltaTime;
         float cd0;
@@ -781,6 +895,46 @@ namespace MissileRangeCalculator
         {
             plotter.RenderStatistics(curFrame, curTime, curAlt, curAngle, TAStoMach(curSpeed, curAlt), curSpeed, curHorDistance, curHorDistance39, maxMach, maxTAS, maxAlt);
         }
+
+        public bool IsStagingTime(float time, float prevTime, out bool hasThrust)
+        {
+            hasThrust = (GetThrust(time) > 0f);
+            for(int i = 0; i < motorInfo.Count; ++i)
+            {
+                if(prevTime < motorInfo[i].timeStart && time >= motorInfo[i].timeStart)
+                {
+                    return true;
+                }
+                if(i == motorInfo.Count - 1)
+                {
+                    if (prevTime < motorInfo[i].timeEnd && time >= motorInfo[i].timeEnd)
+                    {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+
+        public bool IsTurningTime(float time, float prevTime)
+        {
+            for (int i = 0; i < angleRateInfo.Count; ++i)
+            {
+                if (prevTime < angleRateInfo[i].timeStart && time >= angleRateInfo[i].timeStart)
+                {
+                    return true;
+                }
+                if (i == angleRateInfo.Count - 1)
+                {
+                    if (prevTime < angleRateInfo[i].timeEnd && time >= angleRateInfo[i].timeEnd)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 
     public class Plotter
@@ -944,16 +1098,27 @@ namespace MissileRangeCalculator
                 graphics.DrawLine(Pens.White, data.frame - 1, prevData.alt * 0.01f * scale, data.frame, data.alt * 0.01f * scale);
                 graphics.DrawLine(Pens.Orange, data.frame - 1, prevData.mach * 100 * scale, data.frame, data.mach * 100 * scale);
 
-                graphics.DrawLine(Pens.Cyan, data.frame - 1, prevData.tgtDistance1 * 0.005f * scale, data.frame, data.tgtDistance1 * 0.005f * scale);
-                graphics.DrawLine(Pens.Cyan, data.frame - 1, prevData.tgtDistance2 * 0.005f * scale, data.frame, data.tgtDistance2 * 0.005f * scale);
-                graphics.DrawLine(Pens.Yellow, data.frame - 1, prevData.tgtDistance39 * 0.005f * scale, data.frame, data.tgtDistance39 * 0.005f * scale);
-
-                graphics.DrawLine(Pens.Blue, data.frame - 1, prevData.horDistance * 0.005f * scale, data.frame, data.horDistance * 0.005f * scale);
-                graphics.DrawLine(Pens.Yellow, data.frame - 1, prevData.horDistance39 * 0.005f * scale, data.frame, data.horDistance39 * 0.005f * scale);
+                graphics.DrawLine(Pens.Cyan, data.frame - 1, prevData.tgtDistance1 * 0.0025f * scale, data.frame, data.tgtDistance1 * 0.0025f * scale);
+                graphics.DrawLine(Pens.Cyan, data.frame - 1, prevData.tgtDistance2 * 0.0025f * scale, data.frame, data.tgtDistance2 * 0.0025f * scale);
+                graphics.DrawLine(Pens.Yellow, data.frame - 1, prevData.tgtDistance39 * 0.0025f * scale, data.frame, data.tgtDistance39 * 0.0025f * scale);
+                
+                graphics.DrawLine(Pens.Blue, data.frame - 1, prevData.horDistance * 0.0025f * scale, data.frame, data.horDistance * 0.0025f * scale);
+                graphics.DrawLine(Pens.Yellow, data.frame - 1, prevData.horDistance39 * 0.0025f * scale, data.frame, data.horDistance39 * 0.0025f * scale);
 
                 graphics.DrawLine(Pens.Magenta, data.frame - 1, target.Height * 0.667f + prevData.angle * 1f, data.frame, target.Height * 0.667f + data.angle * 1f);
                 graphics.DrawLine(Pens.White, data.frame - 1, target.Height * 0.667f, data.frame, target.Height * 0.667f);
             }
+
+            bool hasThrust = false;
+            if (this.ownerWindow.simulator != null && this.ownerWindow.simulator.IsStagingTime(data.time, prevData != null ? prevData.time : 0f, out hasThrust))
+                graphics.DrawLine(Pens.Orange, data.frame, target.Height * 0.667f + 50f, data.frame, target.Height * 0.667f + 60f);
+            else
+                if (hasThrust)
+                    graphics.DrawLine(Pens.OrangeRed, data.frame, target.Height * 0.667f + 50f, data.frame, target.Height * 0.667f + 60f);
+            if (this.ownerWindow.simulator != null && this.ownerWindow.simulator.IsTurningTime(data.time, prevData != null ? prevData.time : 0f))
+                graphics.DrawLine(Pens.SkyBlue, data.frame, target.Height * 0.667f - 50f, data.frame, target.Height * 0.667f - 60f);
+            graphics.DrawLine(Pens.Orange, data.frame - 1, target.Height * 0.667f + 60f, data.frame, target.Height * 0.667f + 60f);
+            graphics.DrawLine(Pens.SkyBlue, data.frame - 1, target.Height * 0.667f - 60f, data.frame, target.Height * 0.667f - 60f);
 
             if (prevData == null || prevData.time % 10.0 > data.time % 10.0)
             {
@@ -1084,8 +1249,8 @@ namespace MissileRangeCalculator
             legendsGraphics.DrawString("Tgt Distance", font, Brushes.Black, 20f, y);
         }
 
-        int prevCheckFrame = -1;
-        int prevCheckFrameDownRangeX = -1;
+        internal int prevCheckFrame = -1;
+        internal int prevCheckFrameDownRangeX = -1;
 
         public int OnClick(int x, int y, MouseButtons button = MouseButtons.Left)
         {

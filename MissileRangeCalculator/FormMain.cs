@@ -339,6 +339,7 @@ namespace MissileRangeCalculator
         {
             // If it's dragging window border, do not call OnResizeCompleted().
             if (isResizing) return;
+            if (this.WindowState == FormWindowState.Minimized) return;
             OnResizeCompleted();
         }
 

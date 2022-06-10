@@ -291,6 +291,7 @@ namespace MissileRangeCalculator
             if (dialogResult == DialogResult.OK)
             {
                 ParseInfo(File.ReadAllText(openFileDialog.FileName));
+                this.Simulate();
             }
         }
 
@@ -323,22 +324,26 @@ namespace MissileRangeCalculator
         }
 
         bool isResizing = false;
+        bool isMoving = true;
 
         private void FormMain_ResizeBegin(object sender, EventArgs e)
         {
             isResizing = true;
+            isMoving = true;
         }
 
         private void FormMain_ResizeEnd(object sender, EventArgs e)
         {
             isResizing = false;
             // Call OnResizeCompleted() when dragging window border is completed.
-            OnResizeCompleted();
+            if (isMoving == false)
+                OnResizeCompleted();
         }
 
         private void FormMain_Resize(object sender, EventArgs e)
         {
             // If it's dragging window border, do not call OnResizeCompleted().
+            isMoving = false;
             if (isResizing) return;
             if (this.WindowState == FormWindowState.Minimized) return;
             OnResizeCompleted();
@@ -346,15 +351,18 @@ namespace MissileRangeCalculator
 
         private void OnResizeCompleted()
         {
-            int lastCheckFrame = -1;
-            if (this.simulator.plotter != null)
+            if (this.simulator != null)
             {
-                lastCheckFrame = this.simulator.plotter.prevCheckFrame;
-            }
-            Simulate();
-            if (lastCheckFrame != -1)
-            {
-                this.picMain_MouseDown(this, new MouseEventArgs(MouseButtons.Left, 1, lastCheckFrame, 1, 0));
+                int lastCheckFrame = -1;
+                if (this.simulator.plotter != null)
+                {
+                    lastCheckFrame = this.simulator.plotter.prevCheckFrame;
+                }
+                Simulate();
+                if (lastCheckFrame != -1)
+                {
+                    this.picMain_MouseDown(this, new MouseEventArgs(MouseButtons.Left, 1, lastCheckFrame, 1, 0));
+                }
             }
         }
 

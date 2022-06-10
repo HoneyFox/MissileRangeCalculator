@@ -214,9 +214,9 @@ namespace MissileRangeCalculator
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(13, 36);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(173, 12);
+            this.label7.Size = new System.Drawing.Size(203, 12);
             this.label7.TabIndex = 15;
-            this.label7.Text = "T,m,Isp/IspRange/CDs/D/CLMax";
+            this.label7.Text = "T,m,Isp(Range),CDs,Diameter,CLMax";
             // 
             // label8
             // 

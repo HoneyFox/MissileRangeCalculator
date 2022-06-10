@@ -46,12 +46,13 @@ namespace MissileRangeCalculator
         }
 
         private void Simulate()
-        { 
+        {
             List<MotorInfo> motorInfo = MotorInfo.AnalyzeMotorInfo(txtMotor.Text);
+            List<AeroInfo> aeroInfo = AeroInfo.AnalyzeAeroInfo(txtMotor.Text, new float[] { float.Parse(txtSubsonicDrag.Text), float.Parse(txtSupersonicDrag.Text), float.Parse(txtInducedDragFactor.Text), float.Parse(txtDiameter.Text), float.Parse(txtCLMax.Text) });
             List<AngleInfo> angleRateInfo = AngleInfo.AnalyzeAngleInfo(txtPitch.Text);
            
             simulator = new Simulator(plotter, float.Parse(txtDeltaTime.Text), float.Parse(txtSubsonicDrag.Text), float.Parse(txtSupersonicDrag.Text), float.Parse(txtInducedDragFactor.Text), float.Parse(txtCLMax.Text),
-                motorInfo, float.Parse(txtDryMass.Text), float.Parse(txtDiameter.Text), float.Parse(txtInitSpeed.Text), float.Parse(txtInitAngle.Text), float.Parse(txtInitAlt.Text),
+                motorInfo, aeroInfo, float.Parse(txtDryMass.Text), float.Parse(txtDiameter.Text), float.Parse(txtInitSpeed.Text), float.Parse(txtInitAngle.Text), float.Parse(txtInitAlt.Text),
                 float.Parse(txtTargetSpeed.Text), float.Parse(txtTargetDistance.Text), angleRateInfo, float.Parse(txtCutoffSpeed.Text));
 
             plotter.Clear();
@@ -403,8 +404,7 @@ namespace MissileRangeCalculator
 
             return motorInfo;
         }
-
-
+        
         public float timeStart;
         public float timeEnd;
         public float thrustStart;
@@ -421,6 +421,64 @@ namespace MissileRangeCalculator
             this.propellantMassStart = propellantMassStart;
             this.propellantMassEnd = propellantMassEnd;
         }
+    }
+
+    public class AeroInfo
+    {
+        public static List<AeroInfo> AnalyzeAeroInfo(string text, float[] defaultValues)
+        {
+            List<AeroInfo> aeroInfo = new List<AeroInfo>();
+
+            float timeElapsed = 0f;
+
+            float cdSubsonicOverride = defaultValues[0];
+            float cdSupersonicOverride = defaultValues[1];
+            float cdLOverride = defaultValues[2];
+            float diameter = defaultValues[3];
+            float clMaxOverride = defaultValues[4];
+
+            string[] lines = text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < lines.Length; ++i)
+            {
+                string[] components = lines[i].Split(',');
+                float time = float.Parse(components[0]);
+
+                if (components.Length > 3 && components[3] != "")
+                    cdSubsonicOverride = float.Parse(components[3]);
+                if (components.Length > 4 && components[4] != "")
+                    cdSupersonicOverride = float.Parse(components[4]);
+                if (components.Length > 5 && components[5] != "")
+                    cdLOverride = float.Parse(components[5]);
+                if (components.Length > 6 && components[6] != "")
+                    diameter = float.Parse(components[6]);
+                if (components.Length > 7 && components[7] != "")
+                    clMaxOverride = float.Parse(components[7]);
+
+                aeroInfo.Add(new AeroInfo(timeElapsed, timeElapsed + time, cdSubsonicOverride, cdSupersonicOverride, cdLOverride, diameter, clMaxOverride));
+                timeElapsed += time;
+            }
+
+            return aeroInfo;
+        }
+
+        public float timeStart;
+        public float timeEnd;
+        public float cdSubsonicOverride;
+        public float cdSupersonicOverride;
+        public float cdLOverride;
+        public float diameter;
+        public float clMaxOverride;
+
+        public AeroInfo(float timeStart, float timeEnd, float cdSubsonicOverride, float cdSupersonicOverride, float cdLOverride, float diameter, float clMaxOverride)
+        {
+            this.timeStart = timeStart;
+            this.timeEnd = timeEnd;
+            this.cdSubsonicOverride = cdSubsonicOverride;
+            this.cdSupersonicOverride = cdSupersonicOverride;
+            this.cdLOverride = cdLOverride;
+            this.diameter = diameter;
+            this.clMaxOverride = clMaxOverride;
+    }
     }
 
     public class AngleInfo
@@ -524,13 +582,66 @@ namespace MissileRangeCalculator
         public Plotter plotter;
 
         float deltaTime;
-        float cd0;
-        float cd1;
-        float idFactor;
-        float maxLiftCoeff;
+        float cd0(float time)
+        {
+            for (int i = 0; i < aeroInfo.Count; ++i)
+            {
+                if (aeroInfo[i].timeStart <= time && aeroInfo[i].timeEnd > time)
+                {
+                    return aeroInfo[i].cdSubsonicOverride;
+                }
+            }
+            return aeroInfo[aeroInfo.Count - 1].cdSubsonicOverride;
+        }
+        float cd1(float time)
+        {
+            for (int i = 0; i < aeroInfo.Count; ++i)
+            {
+                if (aeroInfo[i].timeStart <= time && aeroInfo[i].timeEnd > time)
+                {
+                    return aeroInfo[i].cdSupersonicOverride;
+                }
+            }
+            return aeroInfo[aeroInfo.Count - 1].cdSupersonicOverride;
+        }
+        float idFactor(float time)
+        {
+            for (int i = 0; i < aeroInfo.Count; ++i)
+            {
+                if (aeroInfo[i].timeStart <= time && aeroInfo[i].timeEnd > time)
+                {
+                    return aeroInfo[i].cdLOverride;
+                }
+            }
+            return aeroInfo[aeroInfo.Count - 1].cdLOverride;
+        }
+        float maxLiftCoeff(float time)
+        {
+            for (int i = 0; i < aeroInfo.Count; ++i)
+            {
+                if (aeroInfo[i].timeStart <= time && aeroInfo[i].timeEnd > time)
+                {
+                    return aeroInfo[i].clMaxOverride;
+                }
+            }
+            return aeroInfo[aeroInfo.Count - 1].clMaxOverride;
+        }
         List<MotorInfo> motorInfo;
+        List<AeroInfo> aeroInfo;
         float dryMass;
-        float refArea;
+        float refArea(float time)
+        {
+            for (int i = 0; i < aeroInfo.Count; ++i)
+            {
+                if (aeroInfo[i].timeStart <= time && aeroInfo[i].timeEnd > time)
+                {
+                    float diameter = aeroInfo[i].diameter;
+                    return (float)(diameter * diameter * Math.PI * 0.25) * 1.414f;
+                }
+            }
+            float finalDiameter = aeroInfo[aeroInfo.Count - 1].diameter;
+            return (float)(finalDiameter * finalDiameter * Math.PI * 0.25) * 1.414f;
+        }
         float initSpeed;
         float initAngle;
         float initAlt;
@@ -541,18 +652,19 @@ namespace MissileRangeCalculator
 
         float maxThrustTime;
 
-        public Simulator(Plotter plotter, float deltaTime, float cd0, float cd1, float idFactor, float maxLiftCoeff, List<MotorInfo> motorInfo, float dryMass, float diameter,
+        public Simulator(Plotter plotter, float deltaTime, float cd0, float cd1, float idFactor, float maxLiftCoeff, List<MotorInfo> motorInfo, List<AeroInfo> aeroInfo, float dryMass, float diameter,
             float initSpeed, float initAngle, float initAlt, float targetSpeed, float targetDistance, List<AngleInfo> angleRateInfo, float cutoffSpeed)
         {
             this.plotter = plotter;
             this.deltaTime = deltaTime;
-            this.cd0 = cd0;
-            this.cd1 = cd1;
-            this.idFactor = idFactor;
-            this.maxLiftCoeff = maxLiftCoeff;
+            //this.cd0 = cd0;
+            //this.cd1 = cd1;
+            //this.idFactor = idFactor;
+            //this.maxLiftCoeff = maxLiftCoeff;
             this.motorInfo = motorInfo;
+            this.aeroInfo = aeroInfo;
             this.dryMass = dryMass;
-            this.refArea = (float)(diameter * diameter * Math.PI * 0.25) * 1.414f;
+            //this.refArea = (float)(diameter * diameter * Math.PI * 0.25) * 1.414f;
             this.initSpeed = initSpeed;
             this.initAngle = initAngle;
             this.initAlt = initAlt;
@@ -644,10 +756,10 @@ namespace MissileRangeCalculator
             return GetLocalG() - centrifugalAcc;
         }
         
-        public float GetMaxLiftForce()
+        public float GetMaxLiftForce(float time)
         {
             float dynPressure = GetDynPressure(curSpeed, curAlt);
-            return maxLiftCoeff * refArea * dynPressure;
+            return maxLiftCoeff(time) * refArea(time) * dynPressure;
         }
 
         public float UpdatePitchAngle(float time, float deltaTime, float mass)
@@ -663,7 +775,7 @@ namespace MissileRangeCalculator
                         float gravityAngleRate = (float)(-accForStraightFlight / curSpeed * 180 / Math.PI) + (float)(Math.Sin(GetEngineAngle(time) * Math.PI / 180f) * GetThrust(time) / mass / curSpeed * 180 / Math.PI);
                         curAngle += gravityAngleRate * deltaTime;
                                 
-                        float maxLiftAcc = GetMaxLiftForce() / mass;
+                        float maxLiftAcc = GetMaxLiftForce(time) / mass;
 
                         float liftAccRequired;
                         if (angleRateInfo[i].useLiftG == false)
@@ -713,16 +825,16 @@ namespace MissileRangeCalculator
             return curAngle + (float)(-accForStraightFlight / curSpeed * 180f / Math.PI) * deltaTime;
         }
 
-        public float GetDragCoeff(float mach)
+        public float GetDragCoeff(float mach, float time)
         {
             float Cd0 = 0f;
             if (mach <= 1)
             {
-                Cd0 = (float)(Math.Sin(Math.Pow(mach, 10.0) * 3.1415926 + 1.5 * 3.1415926) * (cd1 - cd0) / 2.0 + cd0 + (cd1 - cd0) / 2.0);
+                Cd0 = (float)(Math.Sin(Math.Pow(mach, 10.0) * 3.1415926 + 1.5 * 3.1415926) * (cd1(time) - cd0(time)) / 2.0 + cd0(time) + (cd1(time) - cd0(time)) / 2.0);
             }
             else
             {
-                Cd0 = (float)(Math.Sin(Math.Pow(mach, -0.75) * 3.1415926 - 0.5 * 3.1415926) * (cd1 - cd0) / 2 + cd0 + (cd1 - cd0) / 2.0);
+                Cd0 = (float)(Math.Sin(Math.Pow(mach, -0.75) * 3.1415926 - 0.5 * 3.1415926) * (cd1(time) - cd0(time)) / 2 + cd0(time) + (cd1(time) - cd0(time)) / 2.0);
             }
 
             return Cd0;
@@ -795,10 +907,10 @@ namespace MissileRangeCalculator
             return TAS / sonicSpeed;
         }
 
-        public float CalculateDrag(float angleRate, float mass, out float liftAcc, out float liftCoeff)
+        public float CalculateDrag(float angleRate, float mass, float time, out float liftAcc, out float liftCoeff)
         {
             float dynPressure = GetDynPressure(curSpeed, curAlt);
-            float drag0 = GetDragCoeff(TAStoMach(curSpeed, curAlt)) * refArea * dynPressure;
+            float drag0 = GetDragCoeff(TAStoMach(curSpeed, curAlt), time) * refArea(time) * dynPressure;
             float accForStraightFlight = (float)(Math.Cos(curAngle * Math.PI / 180f) * GetNetG());
             float curAcc = angleRate * curSpeed;
             liftAcc = (curAcc + accForStraightFlight - (float)(Math.Sin(GetEngineAngle(curTime) * Math.PI / 180f) * GetThrust(curTime) / mass));
@@ -806,9 +918,9 @@ namespace MissileRangeCalculator
             float dragL = 0f;
             if (dynPressure > 0)
             {
-                liftCoeff = liftForce / refArea / dynPressure;
-                float cdL = liftCoeff * liftCoeff * idFactor;
-                dragL = cdL * refArea * dynPressure;
+                liftCoeff = liftForce / refArea(time) / dynPressure;
+                float cdL = liftCoeff * liftCoeff * idFactor(time);
+                dragL = cdL * refArea(time) * dynPressure;
             }
             else
             {
@@ -824,6 +936,7 @@ namespace MissileRangeCalculator
         float curAcc;
         float curAngle;
         float curLiftAcc;
+        float curDragAcc;
         float curCLReq;
         float curHorDistance;
         float curHorDistance39;
@@ -842,7 +955,10 @@ namespace MissileRangeCalculator
             float newAngle = UpdatePitchAngle(curTime, deltaTime, curMass);
             float deltaAngle = newAngle - curAngle;
             float engineAngle = GetEngineAngle(curTime);
-            curAcc = (GetThrust(curTime) * (float)Math.Cos(engineAngle * Math.PI / 180f) - CalculateDrag((float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, out curLiftAcc, out curCLReq)) / curMass - (float)(GetLocalG() * Math.Sin(curAngle * Math.PI / 180f));
+
+            float curDrag = CalculateDrag((float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, curTime, out curLiftAcc, out curCLReq);
+            curDragAcc = curDrag / curMass;
+            curAcc = (GetThrust(curTime) * (float)Math.Cos(engineAngle * Math.PI / 180f) - curDrag) / curMass - (float)(GetNetG() * Math.Sin(curAngle * Math.PI / 180f));
             curAngle = newAngle;
             curSpeed = curSpeed + curAcc * deltaTime;
             curHorDistance += curSpeed * (float)(Math.Cos(curAngle * Math.PI / 180f)) * deltaTime;
@@ -873,7 +989,7 @@ namespace MissileRangeCalculator
                 UpdateFrame();
                 downRangeData.Add(new Tuple<float, float>(curHorDistance, curAlt));
                 plotter.Render(curFrame, curTime, curHorDistance, curHorDistance39,
-                    curAlt, curSpeed, TAStoIAS(curSpeed, curAlt), TAStoMach(curSpeed, curAlt), curAcc, curLiftAcc / 9.81f, curCLReq, curAngle,
+                    curAlt, curSpeed, TAStoIAS(curSpeed, curAlt), TAStoMach(curSpeed, curAlt), curAcc, curLiftAcc / 9.81f, (Math.Abs(curLiftAcc) > 0.005 && curDragAcc > 0 ? Math.Abs(curLiftAcc) / curDragAcc : 0.0f), curCLReq, curAngle,
                     curTargetDistance1, curTargetDistance2, curTargetDistance39);
                 curTime += deltaTime;
                 curFrame++;
@@ -959,13 +1075,14 @@ namespace MissileRangeCalculator
             public float mach;
             public float acc;
             public float liftG;
+            public float ldRatio;
             public float reqCL;
             public float angle;
             public float tgtDistance1;
             public float tgtDistance2;
             public float tgtDistance39;
 
-            public PlotData(int frame, float time, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float reqCL, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
+            public PlotData(int frame, float time, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float ldRatio, float reqCL, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
             {
                 this.frame = frame;
                 this.time = time;
@@ -977,6 +1094,7 @@ namespace MissileRangeCalculator
                 this.mach = mach;
                 this.acc = acc;
                 this.liftG = liftG;
+                this.ldRatio = ldRatio;
                 this.reqCL = reqCL;
                 this.angle = angle;
                 this.tgtDistance1 = tgtDistance1;
@@ -996,6 +1114,7 @@ namespace MissileRangeCalculator
                     .Append("Mach ").AppendLine(mach.ToString("F2"))
                     .Append("Acc ").AppendLine(acc.ToString("F2"))
                     .Append("LiftG ").AppendLine(liftG.ToString("F2"))
+                    .Append("L/D ").AppendLine(ldRatio.ToString("F2"))
                     .Append("ReqCL ").AppendLine(reqCL.ToString("F2"))
                     .Append("Angle ").AppendLine(angle.ToString("F2"))
                     .Append("HDist ").AppendLine(horDistance.ToString("F2"))
@@ -1075,9 +1194,9 @@ namespace MissileRangeCalculator
             this.cutoffSpeed = s;
         }
 
-        public void Render(int frame, float time, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float reqCL, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
+        public void Render(int frame, float time, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float ldRatio, float reqCL, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
         {
-            var data = new PlotData(frame, time, horDistance, horDistance39, alt, TAS, IAS, mach, acc, liftG, reqCL, angle, tgtDistance1, tgtDistance2, tgtDistance39);
+            var data = new PlotData(frame, time, horDistance, horDistance39, alt, TAS, IAS, mach, acc, liftG, ldRatio, reqCL, angle, tgtDistance1, tgtDistance2, tgtDistance39);
 
             if (isFirstFrame == false)
             {
@@ -1114,6 +1233,7 @@ namespace MissileRangeCalculator
                 graphics.DrawLine(Pens.Yellow, data.frame - 1, prevData.horDistance39 * 0.0025f * scale, data.frame, data.horDistance39 * 0.0025f * scale);
 
                 graphics.DrawLine(Pens.Magenta, data.frame - 1, target.Height * 0.667f + prevData.angle * 1f, data.frame, target.Height * 0.667f + data.angle * 1f);
+                graphics.DrawLine(Pens.Black, data.frame - 1, target.Height * 0.667f + prevData.ldRatio * 40f * scale, data.frame, target.Height * 0.667f + data.ldRatio * 40f * scale);
                 graphics.DrawLine(Pens.White, data.frame - 1, target.Height * 0.667f, data.frame, target.Height * 0.667f);
             }
 
@@ -1290,10 +1410,14 @@ namespace MissileRangeCalculator
                 if (prevCheckFrame >= 0 && prevCheckFrame < plotData.Count)
                 {
                     RenderPlotData(plotData[prevCheckFrame], (prevCheckFrame == 0) ? null : plotData[prevCheckFrame - 1]);
+                    if (prevCheckFrame < plotData.Count - 1)
+                        RenderPlotData(plotData[prevCheckFrame + 1], (prevCheckFrame == 0) ? null : plotData[prevCheckFrame]);
                 }
                 if (prevCheckFrameDownRangeX >= 0 && prevCheckFrameDownRangeX < plotData.Count)
                 {
                     RenderPlotData(plotData[prevCheckFrameDownRangeX], (prevCheckFrameDownRangeX == 0) ? null : plotData[prevCheckFrameDownRangeX - 1]);
+                    if (prevCheckFrameDownRangeX < plotData.Count - 1)
+                        RenderPlotData(plotData[prevCheckFrameDownRangeX + 1], (prevCheckFrameDownRangeX == 0) ? null : plotData[prevCheckFrameDownRangeX]);
                 }
 
                 graphics.DrawLine(Pens.White, x, 0, x, target.Height);

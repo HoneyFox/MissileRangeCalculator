@@ -108,7 +108,7 @@ namespace MissileRangeCalculator
             this.txtMotor.Location = new System.Drawing.Point(12, 58);
             this.txtMotor.Multiline = true;
             this.txtMotor.Name = "txtMotor";
-            this.txtMotor.Size = new System.Drawing.Size(156, 136);
+            this.txtMotor.Size = new System.Drawing.Size(202, 136);
             this.txtMotor.TabIndex = 3;
             this.txtMotor.Text = "7.5,50,276";
             this.txtMotor.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.txtMotor_MouseWheel);
@@ -214,9 +214,9 @@ namespace MissileRangeCalculator
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(13, 36);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(101, 12);
+            this.label7.Size = new System.Drawing.Size(173, 12);
             this.label7.TabIndex = 15;
-            this.label7.Text = "T,m,Isp/IspRange";
+            this.label7.Text = "T,m,Isp/IspRange/CDs/D/CLMax";
             // 
             // label8
             // 
@@ -241,9 +241,9 @@ namespace MissileRangeCalculator
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.picMain.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.picMain.Location = new System.Drawing.Point(180, 58);
+            this.picMain.Location = new System.Drawing.Point(222, 58);
             this.picMain.Name = "picMain";
-            this.picMain.Size = new System.Drawing.Size(742, 545);
+            this.picMain.Size = new System.Drawing.Size(700, 545);
             this.picMain.TabIndex = 18;
             this.picMain.TabStop = false;
             this.picMain.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picMain_MouseDown);
@@ -265,7 +265,7 @@ namespace MissileRangeCalculator
             this.txtPitch.Location = new System.Drawing.Point(12, 228);
             this.txtPitch.Multiline = true;
             this.txtPitch.Name = "txtPitch";
-            this.txtPitch.Size = new System.Drawing.Size(156, 126);
+            this.txtPitch.Size = new System.Drawing.Size(202, 126);
             this.txtPitch.TabIndex = 20;
             this.txtPitch.Text = "10,0\r\n10,-0.7\r\n20,-0.8\r\n90,-0.5";
             this.txtPitch.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.txtPitch_MouseWheel);
@@ -273,7 +273,7 @@ namespace MissileRangeCalculator
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(190, 36);
+            this.label10.Location = new System.Drawing.Point(220, 36);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(71, 12);
             this.label10.TabIndex = 21;
@@ -281,7 +281,7 @@ namespace MissileRangeCalculator
             // 
             // txtTargetSpeed
             // 
-            this.txtTargetSpeed.Location = new System.Drawing.Point(267, 31);
+            this.txtTargetSpeed.Location = new System.Drawing.Point(297, 31);
             this.txtTargetSpeed.Name = "txtTargetSpeed";
             this.txtTargetSpeed.Size = new System.Drawing.Size(56, 21);
             this.txtTargetSpeed.TabIndex = 22;
@@ -290,7 +290,7 @@ namespace MissileRangeCalculator
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(329, 36);
+            this.label11.Location = new System.Drawing.Point(359, 36);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(89, 12);
             this.label11.TabIndex = 23;
@@ -298,7 +298,7 @@ namespace MissileRangeCalculator
             // 
             // txtTargetDistance
             // 
-            this.txtTargetDistance.Location = new System.Drawing.Point(424, 31);
+            this.txtTargetDistance.Location = new System.Drawing.Point(454, 31);
             this.txtTargetDistance.Name = "txtTargetDistance";
             this.txtTargetDistance.Size = new System.Drawing.Size(90, 21);
             this.txtTargetDistance.TabIndex = 24;
@@ -357,7 +357,7 @@ namespace MissileRangeCalculator
             this.picPlotData.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.picPlotData.Location = new System.Drawing.Point(12, 366);
             this.picPlotData.Name = "picPlotData";
-            this.picPlotData.Size = new System.Drawing.Size(156, 237);
+            this.picPlotData.Size = new System.Drawing.Size(202, 237);
             this.picPlotData.TabIndex = 30;
             this.picPlotData.TabStop = false;
             // 
@@ -375,7 +375,7 @@ namespace MissileRangeCalculator
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(520, 36);
+            this.label14.Location = new System.Drawing.Point(550, 36);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(41, 12);
             this.label14.TabIndex = 32;
@@ -383,7 +383,7 @@ namespace MissileRangeCalculator
             // 
             // txtCLMax
             // 
-            this.txtCLMax.Location = new System.Drawing.Point(567, 31);
+            this.txtCLMax.Location = new System.Drawing.Point(597, 31);
             this.txtCLMax.Name = "txtCLMax";
             this.txtCLMax.Size = new System.Drawing.Size(56, 21);
             this.txtCLMax.TabIndex = 33;

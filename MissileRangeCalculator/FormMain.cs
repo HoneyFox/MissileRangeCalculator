@@ -842,7 +842,7 @@ namespace MissileRangeCalculator
             }
             else
             {
-                Cd0 = (float)(Math.Sin(Math.Pow(mach, -0.75) * 3.1415926 - 0.5 * 3.1415926) * (cd1(time) - cd0(time)) / 2 + cd0(time) + (cd1(time) - cd0(time)) / 2.0);
+                Cd0 = (float)(Math.Sin(Math.Pow(mach, -0.75) * 3.1415926 - 0.5 * 3.1415926) * (cd1(time) * 2.0 - cd0(time)) / 4.0 + cd0(time) / 2.0 + (cd1(time) * 2.0 - cd0(time)) / 4.0);
             }
 
             return Cd0;

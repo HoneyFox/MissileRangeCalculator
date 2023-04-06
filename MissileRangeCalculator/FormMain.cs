@@ -378,6 +378,15 @@ namespace MissileRangeCalculator
             float totalPropellantMass = 0f;
 
             string[] lines = text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < lines.Length; ++i)
+            {
+                if (lines[i].Contains("//"))
+                {
+                    lines[i] = lines[i].Split(new string[] { "//" }, StringSplitOptions.None)[0].TrimEnd(' ');
+                }
+            }
+
             for (int i = 0; i < lines.Length; ++i)
             {
                 string[] components = lines[i].Split(',');
@@ -446,6 +455,15 @@ namespace MissileRangeCalculator
             float clMaxOverride = defaultValues[4];
 
             string[] lines = text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < lines.Length; ++i)
+            {
+                if (lines[i].Contains("//"))
+                {
+                    lines[i] = lines[i].Split(new string[] { "//" }, StringSplitOptions.None)[0].TrimEnd(' ');
+                }
+            }
+
             for (int i = 0; i < lines.Length; ++i)
             {
                 string[] components = lines[i].Split(',');
@@ -498,6 +516,15 @@ namespace MissileRangeCalculator
             float timeElapsed = 0f;
 
             string[] lines = text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < lines.Length; ++i)
+            {
+                if (lines[i].Contains("//"))
+                {
+                    lines[i] = lines[i].Split(new string[] { "//" }, StringSplitOptions.None)[0].TrimEnd(' ');
+                }
+            }
+
             for (int i = 0; i < lines.Length; ++i)
             {
                 string[] components = lines[i].Split( new char[] { ',' }, StringSplitOptions.None);

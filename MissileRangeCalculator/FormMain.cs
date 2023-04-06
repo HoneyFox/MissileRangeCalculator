@@ -966,6 +966,7 @@ namespace MissileRangeCalculator
 
         int curFrame;
         float curTime;
+        float curMass;
         float curAlt;
         float curSpeed;
         float curAcc;
@@ -986,7 +987,7 @@ namespace MissileRangeCalculator
 
         public void UpdateFrame()
         {
-            float curMass = GetMass(curTime);
+            curMass = GetMass(curTime);
             float newAngle = UpdatePitchAngle(curTime, deltaTime, curMass);
             float deltaAngle = newAngle - curAngle;
             float engineAngle = GetEngineAngle(curTime);
@@ -1009,6 +1010,7 @@ namespace MissileRangeCalculator
         {
             curFrame = 0;
             curTime = 0f;
+            curMass = GetMass(0);
             curAlt = initAlt;
             curSpeed = initSpeed;
             curAcc = 0f;
@@ -1023,7 +1025,7 @@ namespace MissileRangeCalculator
             {
                 UpdateFrame();
                 downRangeData.Add(new Tuple<float, float>(curHorDistance, curAlt));
-                plotter.Render(curFrame, curTime, curHorDistance, curHorDistance39,
+                plotter.Render(curFrame, curTime, curMass, curHorDistance, curHorDistance39,
                     curAlt, curSpeed, TAStoIAS(curSpeed, curAlt), TAStoMach(curSpeed, curAlt), curAcc, curLiftAcc / 9.81f, (Math.Abs(curLiftAcc) > 0.005 && curDragAcc > 0 ? Math.Abs(curLiftAcc) / curDragAcc : 0.0f), curCLReq, curAngle,
                     curTargetDistance1, curTargetDistance2, curTargetDistance39);
                 curTime += deltaTime;
@@ -1102,6 +1104,7 @@ namespace MissileRangeCalculator
         {
             public int frame;
             public float time;
+            public float mass;
             public float horDistance;
             public float horDistance39;
             public float alt;
@@ -1117,10 +1120,11 @@ namespace MissileRangeCalculator
             public float tgtDistance2;
             public float tgtDistance39;
 
-            public PlotData(int frame, float time, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float ldRatio, float reqCL, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
+            public PlotData(int frame, float time, float mass, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float ldRatio, float reqCL, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
             {
                 this.frame = frame;
                 this.time = time;
+                this.mass = mass;
                 this.horDistance = horDistance;
                 this.horDistance39 = horDistance39;
                 this.alt = alt;
@@ -1143,6 +1147,7 @@ namespace MissileRangeCalculator
                 sb
                     .Append("Frame ").AppendLine(frame.ToString())
                     .Append("Time ").AppendLine(time.ToString("F2"))
+                    .Append("Mass ").AppendLine(mass.ToString("F2"))
                     .Append("Alt ").AppendLine(alt.ToString("F2"))
                     .Append("TAS ").AppendLine(TAS.ToString("F2"))
                     .Append("IAS ").AppendLine(IAS.ToString("F2"))
@@ -1229,9 +1234,9 @@ namespace MissileRangeCalculator
             this.cutoffSpeed = s;
         }
 
-        public void Render(int frame, float time, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float ldRatio, float reqCL, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
+        public void Render(int frame, float time, float mass, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float ldRatio, float reqCL, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
         {
-            var data = new PlotData(frame, time, horDistance, horDistance39, alt, TAS, IAS, mach, acc, liftG, ldRatio, reqCL, angle, tgtDistance1, tgtDistance2, tgtDistance39);
+            var data = new PlotData(frame, time, mass, horDistance, horDistance39, alt, TAS, IAS, mach, acc, liftG, ldRatio, reqCL, angle, tgtDistance1, tgtDistance2, tgtDistance39);
 
             if (isFirstFrame == false)
             {

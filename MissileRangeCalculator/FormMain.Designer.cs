@@ -108,7 +108,7 @@ namespace MissileRangeCalculator
             this.txtMotor.Location = new System.Drawing.Point(12, 58);
             this.txtMotor.Multiline = true;
             this.txtMotor.Name = "txtMotor";
-            this.txtMotor.Size = new System.Drawing.Size(202, 136);
+            this.txtMotor.Size = new System.Drawing.Size(252, 136);
             this.txtMotor.TabIndex = 3;
             this.txtMotor.Text = "7.5,50,276";
             this.txtMotor.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.txtMotor_MouseWheel);
@@ -241,9 +241,9 @@ namespace MissileRangeCalculator
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.picMain.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.picMain.Location = new System.Drawing.Point(222, 58);
+            this.picMain.Location = new System.Drawing.Point(272, 58);
             this.picMain.Name = "picMain";
-            this.picMain.Size = new System.Drawing.Size(700, 545);
+            this.picMain.Size = new System.Drawing.Size(650, 545);
             this.picMain.TabIndex = 18;
             this.picMain.TabStop = false;
             this.picMain.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picMain_MouseDown);
@@ -265,7 +265,7 @@ namespace MissileRangeCalculator
             this.txtPitch.Location = new System.Drawing.Point(12, 228);
             this.txtPitch.Multiline = true;
             this.txtPitch.Name = "txtPitch";
-            this.txtPitch.Size = new System.Drawing.Size(202, 126);
+            this.txtPitch.Size = new System.Drawing.Size(252, 126);
             this.txtPitch.TabIndex = 20;
             this.txtPitch.Text = "10,0\r\n10,-0.7\r\n20,-0.8\r\n90,-0.5";
             this.txtPitch.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.txtPitch_MouseWheel);
@@ -357,7 +357,7 @@ namespace MissileRangeCalculator
             this.picPlotData.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.picPlotData.Location = new System.Drawing.Point(12, 366);
             this.picPlotData.Name = "picPlotData";
-            this.picPlotData.Size = new System.Drawing.Size(202, 237);
+            this.picPlotData.Size = new System.Drawing.Size(252, 237);
             this.picPlotData.TabIndex = 30;
             this.picPlotData.TabStop = false;
             // 

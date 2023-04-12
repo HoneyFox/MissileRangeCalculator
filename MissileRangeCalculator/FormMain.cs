@@ -106,6 +106,57 @@ namespace MissileRangeCalculator
             }
         }
 
+        private void txtPitch_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Middle)
+            {
+                if (txtPitch.SelectedText != "")
+                {
+                    if (this.isCtrlDown)
+                    {
+                        // Split to two lines
+                        Plotter.PlotData data = plotter.GetPlotData(plotter.prevCheckFrame);
+                        if (data != null)
+                        {
+                            float time = data.time;
+                            AngleInfo ai = simulator.GetAngleInfo(time);
+                            float time1 = time - ai.timeStart;
+                            float time2 = ai.timeEnd - time;
+                            string txtToCopy = txtPitch.SelectedText;
+                            string txtCopied = txtToCopy;
+                            txtToCopy = time1.ToString() + txtToCopy.Substring(txtToCopy.IndexOf(','));
+                            txtCopied = time2.ToString() + txtCopied.Substring(txtCopied.IndexOf(','));
+                            txtPitch.Text = txtPitch.Text.Substring(0, txtPitch.SelectionStart) + txtToCopy + Environment.NewLine + txtCopied + txtPitch.Text.Substring(txtPitch.SelectionStart + txtPitch.SelectionLength);
+                            Simulate();
+                            picMain_MouseDown(this, new MouseEventArgs(MouseButtons.Left, 1, simulator.plotter.prevCheckFrame, 0, 0));
+                        }
+                    }
+                    else if (this.isShiftDown)
+                    {
+                        // Merge to previous line
+                        Plotter.PlotData data = plotter.GetPlotData(plotter.prevCheckFrame);
+                        if (data != null)
+                        {
+                            float time = data.time;
+                            AngleInfo ai = simulator.GetAngleInfo(time);
+                            AngleInfo aiPrev = simulator.GetAngleInfo(ai.timeStart - float.Parse(txtDeltaTime.Text));
+                            if (aiPrev != null && ai != null)
+                            {
+                                float totalTime = ai.timeEnd - ai.timeStart + aiPrev.timeEnd - aiPrev.timeStart;
+                                string txtToModify = txtPitch.SelectedText;
+                                txtToModify = totalTime.ToString() + txtToModify.Substring(txtToModify.IndexOf(','));
+                                int prevLineEnd = txtPitch.SelectionStart - 1;
+                                int prevLineStart = txtPitch.Text.LastIndexOf(Environment.NewLine, prevLineEnd - Environment.NewLine.Length) + Environment.NewLine.Length;
+                                txtPitch.Text = txtPitch.Text.Substring(0, prevLineStart) + txtToModify + Environment.NewLine + txtPitch.Text.Substring(txtPitch.SelectionStart + txtPitch.SelectionLength + Environment.NewLine.Length);
+                                Simulate();
+                                picMain_MouseDown(this, new MouseEventArgs(MouseButtons.Left, 1, simulator.plotter.prevCheckFrame, 0, 0));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         private void txtMotor_MouseWheel(object sender, MouseEventArgs e)
         {
             if (e.Delta != 0)
@@ -115,6 +166,57 @@ namespace MissileRangeCalculator
                     txtMotor.SelectedText = AdjustTimeValue(txtMotor.SelectedText, e.Delta, this.isCtrlDown ? 1 : (this.isShiftDown ? 50 : 10));
                     Simulate();
                     picMain_MouseDown(this, new MouseEventArgs(MouseButtons.Left, 1, simulator.plotter.prevCheckFrame, 0, 0));
+                }
+            }
+        }
+
+        private void txtMotor_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Middle)
+            {
+                if (txtMotor.SelectedText != "")
+                {
+                    if (this.isCtrlDown)
+                    {
+                        // Split to two lines
+                        Plotter.PlotData data = plotter.GetPlotData(plotter.prevCheckFrame);
+                        if (data != null)
+                        {
+                            float time = data.time;
+                            MotorInfo mi = simulator.GetMotorInfo(time);
+                            float time1 = time - mi.timeStart;
+                            float time2 = mi.timeEnd - time;
+                            string txtToCopy = txtMotor.SelectedText;
+                            string txtCopied = txtToCopy;
+                            txtToCopy = time1.ToString() + txtToCopy.Substring(txtToCopy.IndexOf(','));
+                            txtCopied = time2.ToString() + txtCopied.Substring(txtCopied.IndexOf(','));
+                            txtMotor.Text = txtMotor.Text.Substring(0, txtMotor.SelectionStart) + txtToCopy + Environment.NewLine + txtCopied + txtMotor.Text.Substring(txtMotor.SelectionStart + txtMotor.SelectionLength);
+                            Simulate();
+                            picMain_MouseDown(this, new MouseEventArgs(MouseButtons.Left, 1, simulator.plotter.prevCheckFrame, 0, 0));
+                        }
+                    }
+                    else if (this.isShiftDown)
+                    {
+                        // Merge to previous line
+                        Plotter.PlotData data = plotter.GetPlotData(plotter.prevCheckFrame);
+                        if (data != null)
+                        {
+                            float time = data.time;
+                            MotorInfo mi = simulator.GetMotorInfo(time);
+                            MotorInfo miPrev = simulator.GetMotorInfo(mi.timeStart - float.Parse(txtDeltaTime.Text));
+                            if (miPrev != null && mi != null)
+                            {
+                                float totalTime = mi.timeEnd - mi.timeStart + miPrev.timeEnd - miPrev.timeStart;
+                                string txtToModify = txtMotor.SelectedText;
+                                txtToModify = totalTime.ToString() + txtToModify.Substring(txtToModify.IndexOf(','));
+                                int prevLineEnd = txtMotor.SelectionStart - 1;
+                                int prevLineStart = txtMotor.Text.LastIndexOf(Environment.NewLine, prevLineEnd - Environment.NewLine.Length) + Environment.NewLine.Length;
+                                txtMotor.Text = txtMotor.Text.Substring(0, prevLineStart) + txtToModify + Environment.NewLine + txtMotor.Text.Substring(txtMotor.SelectionStart + txtMotor.SelectionLength + Environment.NewLine.Length);
+                                Simulate();
+                                picMain_MouseDown(this, new MouseEventArgs(MouseButtons.Left, 1, simulator.plotter.prevCheckFrame, 0, 0));
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -365,7 +467,6 @@ namespace MissileRangeCalculator
                 }
             }
         }
-
     }
 
     public class MotorInfo
@@ -736,6 +837,32 @@ namespace MissileRangeCalculator
                 return value + maxStep;
         }
 
+        public MotorInfo GetMotorInfo(float time)
+        {
+            for (int i = 0; i < motorInfo.Count; ++i)
+            {
+                if (motorInfo[i].timeStart <= time && motorInfo[i].timeEnd > time)
+                {
+                    return motorInfo[i];
+                }
+            }
+
+            return null;
+        }
+
+        public AngleInfo GetAngleInfo(float time)
+        {
+            for (int i = 0; i < angleRateInfo.Count; ++i)
+            {
+                if (angleRateInfo[i].timeStart <= time && angleRateInfo[i].timeEnd > time)
+                {
+                    return angleRateInfo[i];
+                }
+            }
+
+            return null;
+        }
+
         public float GetThrust(float time)
         {
             for (int i = 0; i < motorInfo.Count; ++i)
@@ -942,6 +1069,12 @@ namespace MissileRangeCalculator
             return TAS / sonicSpeed;
         }
 
+        public static float TAStoGS(float TAS, float alt)
+        {
+            float earthRadius = 6341.62f;
+            return TAS * (earthRadius / (alt * 0.001f + earthRadius));
+        }
+
         public float CalculateDrag(float angleRate, float mass, float time, out float liftAcc, out float liftCoeff)
         {
             float dynPressure = GetDynPressure(curSpeed, curAlt);
@@ -985,7 +1118,7 @@ namespace MissileRangeCalculator
         float maxMach;
         float maxAlt;
 
-        public void UpdateFrame()
+        public void UpdateFrame(float deltaTime)
         {
             curMass = GetMass(curTime);
             float newAngle = UpdatePitchAngle(curTime, deltaTime, curMass);
@@ -997,10 +1130,12 @@ namespace MissileRangeCalculator
             curAcc = (GetThrust(curTime) * (float)Math.Cos(engineAngle * Math.PI / 180f) - curDrag) / curMass - (float)(GetNetG() * Math.Sin(curAngle * Math.PI / 180f));
             curAngle = newAngle;
             curSpeed = curSpeed + curAcc * deltaTime;
-            curHorDistance += curSpeed * (float)(Math.Cos(curAngle * Math.PI / 180f)) * deltaTime;
+            float curHorSpeed = curSpeed * (float)(Math.Cos(curAngle * Math.PI / 180f));
+            float curHorGS = TAStoGS(curHorSpeed, curAlt);
+            curHorDistance += curHorGS * deltaTime;
             curAlt += curSpeed * (float)(Math.Sin(curAngle * Math.PI / 180f)) * deltaTime;
-            if (curSpeed > targetSpeed)
-                curHorDistance39 += (float)(Math.Sqrt(curSpeed * curSpeed - targetSpeed * targetSpeed) * (float)(Math.Cos(curAngle * Math.PI / 180f)) * deltaTime);
+            if (curHorGS > targetSpeed)
+                curHorDistance39 += (float)(Math.Sqrt(curHorGS * curHorGS - targetSpeed * targetSpeed) * deltaTime);
 
             curTargetDistance1 -= targetSpeed * deltaTime;
             curTargetDistance2 += targetSpeed * deltaTime;
@@ -1023,12 +1158,16 @@ namespace MissileRangeCalculator
 
             while (true)
             {
-                UpdateFrame();
+                for (int i = 0; i < (int)(deltaTime * 64f); ++i)
+                {
+                    UpdateFrame(1.0f / 64.0f);
+                    curTime += 1.0f / 64.0f;
+                }
                 downRangeData.Add(new Tuple<float, float>(curHorDistance, curAlt));
                 plotter.Render(curFrame, curTime, curMass, curHorDistance, curHorDistance39,
                     curAlt, curSpeed, TAStoIAS(curSpeed, curAlt), TAStoMach(curSpeed, curAlt), curAcc, curLiftAcc / 9.81f, (Math.Abs(curLiftAcc) > 0.005 && curDragAcc > 0 ? Math.Abs(curLiftAcc) / curDragAcc : 0.0f), curCLReq, curAngle,
                     curTargetDistance1, curTargetDistance2, curTargetDistance39);
-                curTime += deltaTime;
+                //curTime += deltaTime;
                 curFrame++;
 
                 if (maxTAS < curSpeed) maxTAS = curSpeed;
@@ -1191,6 +1330,14 @@ namespace MissileRangeCalculator
             this.font = font;
             this.picPlotData = picPlotData;
             this.picLegends = picLegends;
+        }
+
+        public PlotData GetPlotData(int frameIndex)
+        {
+            if (frameIndex >= 0 && frameIndex < plotData.Count)
+                return plotData[frameIndex];
+            else
+                return null;
         }
 
         public void Clear()

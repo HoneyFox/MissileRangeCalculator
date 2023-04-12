@@ -111,6 +111,7 @@ namespace MissileRangeCalculator
             this.txtMotor.Size = new System.Drawing.Size(252, 136);
             this.txtMotor.TabIndex = 3;
             this.txtMotor.Text = "7.5,50,276";
+            this.txtMotor.MouseUp += new System.Windows.Forms.MouseEventHandler(this.txtMotor_MouseUp);
             this.txtMotor.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.txtMotor_MouseWheel);
             // 
             // label2
@@ -268,6 +269,7 @@ namespace MissileRangeCalculator
             this.txtPitch.Size = new System.Drawing.Size(252, 126);
             this.txtPitch.TabIndex = 20;
             this.txtPitch.Text = "10,0\r\n10,-0.7\r\n20,-0.8\r\n90,-0.5";
+            this.txtPitch.MouseUp += new System.Windows.Forms.MouseEventHandler(this.txtPitch_MouseUp);
             this.txtPitch.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.txtPitch_MouseWheel);
             // 
             // label10
@@ -312,7 +314,7 @@ namespace MissileRangeCalculator
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(53, 12);
             this.label12.TabIndex = 25;
-            this.label12.Text = "TimeStep";
+            this.label12.Text = "Scale X";
             // 
             // txtDeltaTime
             // 
@@ -331,14 +333,14 @@ namespace MissileRangeCalculator
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(77, 12);
             this.label13.TabIndex = 27;
-            this.label13.Text = "DisplayScale";
+            this.label13.Text = "Scale Y";
             // 
             // txtDisplayScale
             // 
             this.txtDisplayScale.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDisplayScale.Location = new System.Drawing.Point(873, 31);
+            this.txtDisplayScale.Location = new System.Drawing.Point(856, 31);
             this.txtDisplayScale.Name = "txtDisplayScale";
-            this.txtDisplayScale.Size = new System.Drawing.Size(49, 21);
+            this.txtDisplayScale.Size = new System.Drawing.Size(66, 21);
             this.txtDisplayScale.TabIndex = 28;
             this.txtDisplayScale.Text = "0.5";
             // 

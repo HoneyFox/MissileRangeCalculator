@@ -1002,32 +1002,32 @@ namespace MissileRangeCalculator
             return Cd0;
         }
 
-        public static float TAStoIAS(float TAS, float alt)
+        public static float TAStoIAS(float TAS, double alt)
         {
             float rho0 = 1.225f;
             float rho = GetAirDensity(alt);
             return TAS * (float)(Math.Sqrt(rho / rho0));
         }
 
-        public static float GetAirDensity(float alt)
+        public static float GetAirDensity(double alt)
         {
             float rho0 = 1.225f;
             float T0 = 288.15f;
-            if (alt <= 11000f)
+            if (alt <= 11000)
             {
-                float T = T0 - 0.0065f * alt;
+                float T = T0 - (float)(0.0065f * alt);
                 return rho0 * (float)(Math.Pow(T / T0, 4.25588));
             }
-            else if (alt > 11000f && alt <= 20000f)
+            else if (alt > 11000 && alt <= 20000)
             {
                 return 0.36392f * (float)(Math.Exp((11000 - alt) / 6341.62));
             }
-            else if(alt <= 40000f)
+            else if(alt <= 40000)
             {
-                float T = 216.65f + 0.001f * (alt - 20000f);
+                float T = 216.65f + (float)(0.001f * (alt - 20000));
                 return 0.088035f * (float)(Math.Pow(T / 216.65, -35.1632));
             }
-            else if(alt <= 120000f)
+            else if(alt <= 120000)
             {
                 return 0.003946607f * (float)(Math.Pow(0.5, (alt - 40000) / 6000));
             }
@@ -1037,21 +1037,21 @@ namespace MissileRangeCalculator
             }
         }
 
-        public static float GetSonicSpeed(float alt)
+        public static float GetSonicSpeed(double alt)
         {
             float T0 = 288.15f;
             float T;
-            if (alt <= 11000f)
+            if (alt <= 11000)
             {
-                T = T0 - 0.0065f * alt;
+                T = T0 - (float)(0.0065f * alt);
             }
-            else if (alt > 11000f && alt <= 20000f)
+            else if (alt > 11000 && alt <= 20000)
             {
                 T = T0 - 0.0065f * 11000f;
             }
             else
             {
-                T = T0 - 0.0065f * 11000f + 0.001f * (alt - 20000f);
+                T = T0 - 0.0065f * 11000f + (float)(0.001f * (alt - 20000));
             }
             return 331.3f + 0.606f * (T - 273.15f);
         }
@@ -1154,7 +1154,7 @@ namespace MissileRangeCalculator
 
             curTargetDistance1 = curTargetDistance2 = curTargetDistance39 = targetDistance;
 
-            List<Tuple<float, float>> downRangeData = new List<Tuple<float, float>>();
+            List<Tuple<double, double>> downRangeData = new List<Tuple<double, double>>();
 
             while (true)
             {
@@ -1163,8 +1163,8 @@ namespace MissileRangeCalculator
                     UpdateFrame(1.0f / 64.0f);
                     curTime += 1.0f / 64.0f;
                 }
-                downRangeData.Add(new Tuple<float, float>(curHorDistance, curAlt));
-                plotter.Render(curFrame, curTime, curMass, curHorDistance, curHorDistance39,
+                downRangeData.Add(new Tuple<double, double>(curHorDistance, curAlt));
+                plotter.Record(curFrame, curTime, curMass, curHorDistance, curHorDistance39,
                     curAlt, curSpeed, TAStoIAS(curSpeed, curAlt), TAStoMach(curSpeed, curAlt), curAcc, curLiftAcc / 9.81f, (Math.Abs(curLiftAcc) > 0.005 && curDragAcc > 0 ? Math.Abs(curLiftAcc) / curDragAcc : 0.0f), curCLReq, curAngle,
                     curTargetDistance1, curTargetDistance2, curTargetDistance39);
                 //curTime += deltaTime;
@@ -1180,12 +1180,14 @@ namespace MissileRangeCalculator
                 if (curFrame > 99999) break;
             }
 
+            plotter.RenderAllFrames(maxAlt, maxTAS, Math.Max(curTargetDistance2, curHorDistance));
+
             RenderDownRange(downRangeData);
 
             RenderStatistics();
         }
 
-        public void RenderDownRange(List<Tuple<float, float>> data)
+        public void RenderDownRange(List<Tuple<double, double>> data)
         {
             if (data.Count <= 1) return;
             plotter.RenderDownRange(data);
@@ -1244,9 +1246,9 @@ namespace MissileRangeCalculator
             public int frame;
             public float time;
             public float mass;
-            public float horDistance;
-            public float horDistance39;
-            public float alt;
+            public double horDistance;
+            public double horDistance39;
+            public double alt;
             public float TAS;
             public float IAS;
             public float mach;
@@ -1255,11 +1257,11 @@ namespace MissileRangeCalculator
             public float ldRatio;
             public float reqCL;
             public float angle;
-            public float tgtDistance1;
-            public float tgtDistance2;
-            public float tgtDistance39;
+            public double tgtDistance1;
+            public double tgtDistance2;
+            public double tgtDistance39;
 
-            public PlotData(int frame, float time, float mass, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float ldRatio, float reqCL, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
+            public PlotData(int frame, float time, float mass, double horDistance, double horDistance39, double alt, float TAS, float IAS, float mach, float acc, float liftG, float ldRatio, float reqCL, float angle, double tgtDistance1, double tgtDistance2, double tgtDistance39)
             {
                 this.frame = frame;
                 this.time = time;
@@ -1318,10 +1320,11 @@ namespace MissileRangeCalculator
         float scale;
         float cutoffSpeed;
 
-        bool isFirstFrame = true;
-
         List<PlotData> plotData = new List<PlotData>();
-        List<Tuple<float, float>> downRangeData = new List<Tuple<float, float>>();
+        List<Tuple<double, double>> downRangeData = new List<Tuple<double, double>>();
+        float maxTAS = 0f;
+        float maxAlt = 0f;
+        float maxDistance = 0f;
 
         public Plotter(FormMain ownerWindow, PictureBox target, Font font, PictureBox picPlotData, PictureBox picLegends)
         {
@@ -1366,7 +1369,6 @@ namespace MissileRangeCalculator
 
             RenderLegends();
 
-            isFirstFrame = true;
             plotData.Clear();
             downRangeData.Clear();
         }
@@ -1381,22 +1383,23 @@ namespace MissileRangeCalculator
             this.cutoffSpeed = s;
         }
 
-        public void Render(int frame, float time, float mass, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float ldRatio, float reqCL, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
+        public void Record(int frame, float time, float mass, float horDistance, float horDistance39, float alt, float TAS, float IAS, float mach, float acc, float liftG, float ldRatio, float reqCL, float angle, float tgtDistance1, float tgtDistance2, float tgtDistance39)
         {
             var data = new PlotData(frame, time, mass, horDistance, horDistance39, alt, TAS, IAS, mach, acc, liftG, ldRatio, reqCL, angle, tgtDistance1, tgtDistance2, tgtDistance39);
+            plotData.Add(data);
+        }
 
-            if (isFirstFrame == false)
+        public void Render(int frame)
+        {
+            var data = plotData[frame];
+            if (frame > 0)
             {
-                RenderPlotData(data, plotData[plotData.Count - 1]);
+                RenderPlotData(data, plotData[frame - 1]);
             }
             else
             {
                 RenderPlotData(data, null);
             }
-
-            plotData.Add(data);
-
-            isFirstFrame = false;
         }
 
         public void RenderPlotData(PlotData data, PlotData prevData)
@@ -1409,15 +1412,15 @@ namespace MissileRangeCalculator
 
             if (prevData != null)
             {
-                graphics.DrawLine(Pens.White, data.frame - 1, prevData.alt * 0.01f * scale, data.frame, data.alt * 0.01f * scale);
+                graphics.DrawLine(Pens.White, data.frame - 1, (float)(prevData.alt * 0.01f * scale), data.frame, (float)(data.alt * 0.01f * scale));
                 graphics.DrawLine(Pens.Orange, data.frame - 1, prevData.mach * 100 * scale, data.frame, data.mach * 100 * scale);
 
-                graphics.DrawLine(Pens.Cyan, data.frame - 1, prevData.tgtDistance1 * 0.0025f * scale, data.frame, data.tgtDistance1 * 0.0025f * scale);
-                graphics.DrawLine(Pens.Cyan, data.frame - 1, prevData.tgtDistance2 * 0.0025f * scale, data.frame, data.tgtDistance2 * 0.0025f * scale);
-                graphics.DrawLine(Pens.Yellow, data.frame - 1, prevData.tgtDistance39 * 0.0025f * scale, data.frame, data.tgtDistance39 * 0.0025f * scale);
+                graphics.DrawLine(Pens.Cyan, data.frame - 1, (float)(prevData.tgtDistance1 / maxDistance) * target.Height * 0.9f, data.frame, (float)(data.tgtDistance1 / maxDistance) * target.Height * 0.9f);
+                graphics.DrawLine(Pens.Cyan, data.frame - 1, (float)(prevData.tgtDistance2 / maxDistance) * target.Height * 0.9f, data.frame, (float)(data.tgtDistance2 / maxDistance) * target.Height * 0.9f);
+                graphics.DrawLine(Pens.Yellow, data.frame - 1, (float)(prevData.tgtDistance39 / maxDistance) * target.Height * 0.9f, data.frame, (float)(data.tgtDistance39 / maxDistance) * target.Height * 0.9f);
                 
-                graphics.DrawLine(Pens.Blue, data.frame - 1, prevData.horDistance * 0.0025f * scale, data.frame, data.horDistance * 0.0025f * scale);
-                graphics.DrawLine(Pens.Yellow, data.frame - 1, prevData.horDistance39 * 0.0025f * scale, data.frame, data.horDistance39 * 0.0025f * scale);
+                graphics.DrawLine(Pens.Blue, data.frame - 1, (float)(prevData.horDistance / maxDistance) * target.Height * 0.9f, data.frame, (float)(data.horDistance / maxDistance) * target.Height * 0.9f);
+                graphics.DrawLine(Pens.Yellow, data.frame - 1, (float)(prevData.horDistance39 / maxDistance) * target.Height * 0.9f, data.frame, (float)(data.horDistance39 / maxDistance) * target.Height * 0.9f);
 
                 graphics.DrawLine(Pens.Magenta, data.frame - 1, target.Height * 0.667f + prevData.angle * 1f, data.frame, target.Height * 0.667f + data.angle * 1f);
                 graphics.DrawLine(Pens.Black, data.frame - 1, target.Height * 0.667f + prevData.ldRatio * 40f * scale, data.frame, target.Height * 0.667f + data.ldRatio * 40f * scale);
@@ -1426,14 +1429,14 @@ namespace MissileRangeCalculator
 
             bool hasThrust = false;
             if (this.ownerWindow.simulator != null && this.ownerWindow.simulator.IsStagingTime(data.time, prevData != null ? prevData.time : 0f, out hasThrust))
-                graphics.DrawLine(Pens.Orange, data.frame, target.Height * 0.667f + 50f, data.frame, target.Height * 0.667f + 60f);
+                graphics.DrawLine(Pens.Orange, data.frame, target.Height * 0.667f + 80f, data.frame, target.Height * 0.667f + 90f);
             else
                 if (hasThrust)
-                    graphics.DrawLine(Pens.OrangeRed, data.frame, target.Height * 0.667f + 50f, data.frame, target.Height * 0.667f + 60f);
+                    graphics.DrawLine(Pens.OrangeRed, data.frame, target.Height * 0.667f + 80f, data.frame, target.Height * 0.667f + 90f);
             if (this.ownerWindow.simulator != null && this.ownerWindow.simulator.IsTurningTime(data.time, prevData != null ? prevData.time : 0f))
-                graphics.DrawLine(Pens.SkyBlue, data.frame, target.Height * 0.667f - 50f, data.frame, target.Height * 0.667f - 60f);
-            graphics.DrawLine(Pens.Orange, data.frame - 1, target.Height * 0.667f + 60f, data.frame, target.Height * 0.667f + 60f);
-            graphics.DrawLine(Pens.SkyBlue, data.frame - 1, target.Height * 0.667f - 60f, data.frame, target.Height * 0.667f - 60f);
+                graphics.DrawLine(Pens.SkyBlue, data.frame, target.Height * 0.667f - 80f, data.frame, target.Height * 0.667f - 90f);
+            graphics.DrawLine(Pens.Orange, data.frame - 1, target.Height * 0.667f + 90f, data.frame, target.Height * 0.667f + 90f);
+            graphics.DrawLine(Pens.SkyBlue, data.frame - 1, target.Height * 0.667f - 90f, data.frame, target.Height * 0.667f - 90f);
 
             if (prevData == null || prevData.time % 10.0 > data.time % 10.0)
             {
@@ -1459,7 +1462,19 @@ namespace MissileRangeCalculator
             graphics.DrawLine(Pens.Black, data.frame - 1, cutoffSpeed * 0.4f * scale, data.frame, cutoffSpeed * 0.4f * scale);
         }
 
-        public void RenderDownRange(List<Tuple<float, float>> data)
+        public void RenderAllFrames(float maxTAS, float maxAlt, float maxDistance)
+        {
+            this.maxTAS = maxTAS;
+            this.maxAlt = maxAlt;
+            this.maxDistance = maxDistance;
+
+            for (int i = 0; i < plotData.Count; ++i)
+            {
+                Render(i);
+            }
+        }
+
+        public void RenderDownRange(List<Tuple<double, double>> data)
         {
             downRangeData = data;
 
@@ -1468,20 +1483,20 @@ namespace MissileRangeCalculator
             Pen p2 = new Pen(Color.FromArgb(128, 255, 255, 255), 1.25f);
             p2.DashPattern = new float[] { 4.0f, 6.0f };
 
-            float maxRange = data[data.Count - 1].Item1;
+            double maxRange = data[data.Count - 1].Item1;
             List<PointF> dataPoints = new List<PointF>();
             List<PointF> dataPointsUniform = new List<PointF>();
             for (int i = 0; i < data.Count; ++i)
             {
-                dataPoints.Add(new PointF(data[i].Item1 / maxRange * data.Count, data[i].Item2 * 0.01f * scale));
-                dataPointsUniform.Add(new PointF(data[i].Item1 / maxRange * data.Count, data[i].Item2 / maxRange * data.Count));
+                dataPoints.Add(new PointF((float)(data[i].Item1 / maxRange * data.Count), (float)(data[i].Item2 * 0.01 * scale)));
+                dataPointsUniform.Add(new PointF((float)(data[i].Item1 / maxRange * data.Count), (float)(data[i].Item2 / maxRange * data.Count)));
             }
 
             graphics.DrawCurve(p, dataPoints.ToArray());
             graphics.DrawCurve(p2, dataPointsUniform.ToArray(), 0.5f);
         }
 
-        public void RenderStatistics(int frame, float time, float alt, float angle, float mach, float speed, float horDistance, float horDistance39, float maxMach, float maxSpeed, float maxAlt)
+        public void RenderStatistics(int frame, float time, double alt, float angle, float mach, float speed, double horDistance, double horDistance39, float maxMach, float maxSpeed, double maxAlt)
         {
             StringBuilder sb = new StringBuilder();
             sb
@@ -1573,12 +1588,12 @@ namespace MissileRangeCalculator
             {
                 if (button == MouseButtons.Right)
                 {
-                    float horDistance = x * plotData[plotData.Count - 1].horDistance / (plotData.Count - 1);
+                    double horDistance = x * plotData[plotData.Count - 1].horDistance / (plotData.Count - 1);
                     int closestIndex = -1;
-                    float closestDistance = float.MaxValue;
+                    double closestDistance = double.MaxValue;
                     for (int i = 0; i < plotData.Count; ++i)
                     {
-                        float distanceError = Math.Abs(plotData[i].horDistance - horDistance);
+                        double distanceError = Math.Abs(plotData[i].horDistance - horDistance);
                         if (distanceError < closestDistance)
                         {
                             closestIndex = i;

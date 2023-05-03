@@ -50,8 +50,21 @@ namespace MissileRangeCalculator
             List<MotorInfo> motorInfo = MotorInfo.AnalyzeMotorInfo(txtMotor.Text);
             List<AeroInfo> aeroInfo = AeroInfo.AnalyzeAeroInfo(txtMotor.Text, new float[] { float.Parse(txtSubsonicDrag.Text), float.Parse(txtSupersonicDrag.Text), float.Parse(txtInducedDragFactor.Text), float.Parse(txtDiameter.Text), float.Parse(txtCLMax.Text) });
             List<AngleInfo> angleRateInfo = AngleInfo.AnalyzeAngleInfo(txtPitch.Text);
-           
-            simulator = new Simulator(plotter, float.Parse(txtDeltaTime.Text), float.Parse(txtSubsonicDrag.Text), float.Parse(txtSupersonicDrag.Text), float.Parse(txtInducedDragFactor.Text), float.Parse(txtCLMax.Text),
+
+            float deltaTime = 0.25f;
+            float accuracy = 1f / 64f;
+            if (txtDeltaTime.Text.Contains(","))
+            {
+                string[] components = txtDeltaTime.Text.Split(new char[] { ',' });
+                deltaTime = float.Parse(components[0]);
+                accuracy = 1f / float.Parse(components[1]);
+            }
+            else
+            {
+                deltaTime = float.Parse(txtDeltaTime.Text);
+            }
+
+            simulator = new Simulator(plotter, deltaTime, accuracy, float.Parse(txtSubsonicDrag.Text), float.Parse(txtSupersonicDrag.Text), float.Parse(txtInducedDragFactor.Text), float.Parse(txtCLMax.Text),
                 motorInfo, aeroInfo, float.Parse(txtDryMass.Text), float.Parse(txtDiameter.Text), float.Parse(txtInitSpeed.Text), float.Parse(txtInitAngle.Text), float.Parse(txtInitAlt.Text),
                 float.Parse(txtTargetSpeed.Text), float.Parse(txtTargetDistance.Text), angleRateInfo, float.Parse(txtCutoffSpeed.Text));
 
@@ -392,6 +405,8 @@ namespace MissileRangeCalculator
             var dialogResult = openFileDialog.ShowDialog();
             if (dialogResult == DialogResult.OK)
             {
+                saveFileDialog.FileName = openFileDialog.FileName;
+                this.Text = "Missile Range Calculator - " + saveFileDialog.FileName;
                 ParseInfo(File.ReadAllText(openFileDialog.FileName));
                 this.Simulate();
             }
@@ -422,7 +437,11 @@ namespace MissileRangeCalculator
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             if (files.Length == 1)
+            {
                 ParseInfo(File.ReadAllText(files[0]));
+                saveFileDialog.FileName = files[0];
+                this.Text = "Missile Range Calculator - " + files[0];
+            }
         }
 
         bool isResizing = false;
@@ -585,6 +604,11 @@ namespace MissileRangeCalculator
                 timeElapsed += time;
             }
 
+            if (aeroInfo.Count == 0)
+            {
+                aeroInfo.Add(new AeroInfo(0f, float.MaxValue, cdSubsonicOverride, cdSupersonicOverride, cdLOverride, diameter, clMaxOverride));
+            }
+
             return aeroInfo;
         }
 
@@ -718,6 +742,7 @@ namespace MissileRangeCalculator
         public Plotter plotter;
 
         float deltaTime;
+        float accuracy;
         float cd0(float time)
         {
             for (int i = 0; i < aeroInfo.Count; ++i)
@@ -788,11 +813,12 @@ namespace MissileRangeCalculator
 
         float maxThrustTime;
 
-        public Simulator(Plotter plotter, float deltaTime, float cd0, float cd1, float idFactor, float maxLiftCoeff, List<MotorInfo> motorInfo, List<AeroInfo> aeroInfo, float dryMass, float diameter,
+        public Simulator(Plotter plotter, float deltaTime, float accuracy, float cd0, float cd1, float idFactor, float maxLiftCoeff, List<MotorInfo> motorInfo, List<AeroInfo> aeroInfo, float dryMass, float diameter,
             float initSpeed, float initAngle, float initAlt, float targetSpeed, float targetDistance, List<AngleInfo> angleRateInfo, float cutoffSpeed)
         {
             this.plotter = plotter;
             this.deltaTime = deltaTime;
+            this.accuracy = accuracy;
             //this.cd0 = cd0;
             //this.cd1 = cd1;
             //this.idFactor = idFactor;
@@ -809,7 +835,7 @@ namespace MissileRangeCalculator
             this.angleRateInfo = angleRateInfo;
             this.cutoffSpeed = cutoffSpeed;
 
-            this.maxThrustTime = motorInfo[motorInfo.Count - 1].timeEnd;
+            this.maxThrustTime = motorInfo.Count > 0 ? motorInfo[motorInfo.Count - 1].timeEnd : 0f;
         }
 
         public static float Lerp(float start, float end, float t)
@@ -906,14 +932,14 @@ namespace MissileRangeCalculator
 
         public double GetLocalG()
         {
-            const double earthRadius = 6371000f;
+            const double earthRadius = 6341620f;
             return Math.Pow(earthRadius / (curAlt + earthRadius), 2) * 9.81;
         }
 
         public double GetNetG()
         {
             double horSpeed = curSpeed * Math.Cos(curAngle * Math.PI / 180f);
-            const double earthRadius = 6371000f;
+            const double earthRadius = 6341620f;
             double centrifugalAcc = horSpeed * horSpeed / earthRadius;
             return GetLocalG() - centrifugalAcc;
         }
@@ -1127,11 +1153,12 @@ namespace MissileRangeCalculator
 
             float curDrag = CalculateDrag((float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, curTime, out curLiftAcc, out curCLReq);
             curDragAcc = curDrag / curMass;
-            curAcc = (GetThrust(curTime) * (float)Math.Cos(engineAngle * Math.PI / 180f) - curDrag) / curMass - (float)(GetNetG() * Math.Sin(curAngle * Math.PI / 180f));
+            curAcc = (GetThrust(curTime) * (float)Math.Cos(engineAngle * Math.PI / 180f) - curDrag) / curMass - (float)(GetLocalG() * Math.Sin(curAngle * Math.PI / 180f));
             curAngle = newAngle;
             curSpeed = curSpeed + curAcc * deltaTime;
             float curHorSpeed = curSpeed * (float)(Math.Cos(curAngle * Math.PI / 180f));
             float curHorGS = TAStoGS(curHorSpeed, curAlt);
+            //curSpeed *= (float)Math.Cos(curHorGS / 6341620.0 * deltaTime);
             curHorDistance += curHorGS * deltaTime;
             curAlt += curSpeed * (float)(Math.Sin(curAngle * Math.PI / 180f)) * deltaTime;
             if (curHorGS > targetSpeed)
@@ -1158,10 +1185,10 @@ namespace MissileRangeCalculator
 
             while (true)
             {
-                for (int i = 0; i < (int)(deltaTime * 64f); ++i)
+                for (int i = 0; i < (int)(deltaTime / accuracy); ++i)
                 {
-                    UpdateFrame(1.0f / 64.0f);
-                    curTime += 1.0f / 64.0f;
+                    UpdateFrame(accuracy);
+                    curTime += accuracy;
                 }
                 downRangeData.Add(new Tuple<double, double>(curHorDistance, curAlt));
                 plotter.Record(curFrame, curTime, curMass, curHorDistance, curHorDistance39,
@@ -1177,7 +1204,7 @@ namespace MissileRangeCalculator
                 if (curAlt < 0) break;
                 if (curTime > maxThrustTime && curSpeed < cutoffSpeed) break;
 
-                if (curFrame > 99999) break;
+                if (curFrame > 9999) break;
             }
 
             plotter.RenderAllFrames(maxAlt, maxTAS, Math.Max(curTargetDistance2, curHorDistance));

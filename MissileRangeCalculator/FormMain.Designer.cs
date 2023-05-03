@@ -493,7 +493,7 @@ namespace MissileRangeCalculator
             this.KeyPreview = true;
             this.MinimumSize = new System.Drawing.Size(1060, 650);
             this.Name = "FormMain";
-            this.Text = "Missie Range Calculator";
+            this.Text = "Missile Range Calculator";
             this.Load += new System.EventHandler(this.FormMain_Load);
             this.ResizeBegin += new System.EventHandler(this.FormMain_ResizeBegin);
             this.ResizeEnd += new System.EventHandler(this.FormMain_ResizeEnd);

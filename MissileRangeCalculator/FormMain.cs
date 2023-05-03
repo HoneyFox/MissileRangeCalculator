@@ -418,6 +418,8 @@ namespace MissileRangeCalculator
             if (dialogResult == DialogResult.OK)
             {
                 File.WriteAllText(saveFileDialog.FileName, GenerateInfo());
+                openFileDialog.FileName = saveFileDialog.FileName;
+                this.Text = "Missile Range Calculator - " + saveFileDialog.FileName;
             }
         }
 

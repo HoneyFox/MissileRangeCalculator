@@ -35,6 +35,9 @@ namespace MissileRangeCalculator
             {
                 string filePath = parameters[1].Trim('"');
                 ParseInfo(File.ReadAllText(filePath));
+                openFileDialog.FileName = filePath;
+                saveFileDialog.FileName = filePath;
+                this.Text = "Missile Range Calculator - " + filePath;
             }
         }
 

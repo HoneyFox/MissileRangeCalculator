@@ -72,6 +72,7 @@ namespace MissileRangeCalculator
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.btnOpen = new System.Windows.Forms.Button();
+            this.btnOpenScript = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picMain)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPlotData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picLegends)).BeginInit();
@@ -312,7 +313,7 @@ namespace MissileRangeCalculator
             this.label12.AutoSize = true;
             this.label12.Location = new System.Drawing.Point(659, 36);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(53, 12);
+            this.label12.Size = new System.Drawing.Size(47, 12);
             this.label12.TabIndex = 25;
             this.label12.Text = "Scale X";
             // 
@@ -331,7 +332,7 @@ namespace MissileRangeCalculator
             this.label13.AutoSize = true;
             this.label13.Location = new System.Drawing.Point(790, 36);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(77, 12);
+            this.label13.Size = new System.Drawing.Size(47, 12);
             this.label13.TabIndex = 27;
             this.label13.Text = "Scale Y";
             // 
@@ -445,12 +446,23 @@ namespace MissileRangeCalculator
             this.btnOpen.UseVisualStyleBackColor = true;
             this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
             // 
+            // btnOpenScript
+            // 
+            this.btnOpenScript.Location = new System.Drawing.Point(177, 204);
+            this.btnOpenScript.Name = "btnOpenScript";
+            this.btnOpenScript.Size = new System.Drawing.Size(87, 20);
+            this.btnOpenScript.TabIndex = 38;
+            this.btnOpenScript.Text = "Script ...";
+            this.btnOpenScript.UseVisualStyleBackColor = true;
+            this.btnOpenScript.Click += new System.EventHandler(this.btnOpenScript_Click);
+            // 
             // FormMain
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1044, 611);
+            this.Controls.Add(this.btnOpenScript);
             this.Controls.Add(this.btnOpen);
             this.Controls.Add(this.btnSaveAs);
             this.Controls.Add(this.btnCopy);
@@ -551,6 +563,7 @@ namespace MissileRangeCalculator
         private System.Windows.Forms.SaveFileDialog saveFileDialog;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.Button btnOpen;
+        private Button btnOpenScript;
     }
 }
 

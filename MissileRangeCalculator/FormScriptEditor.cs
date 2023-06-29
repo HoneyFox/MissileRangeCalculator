@@ -23,6 +23,7 @@ namespace MissileRangeCalculator
         public void SetScriptData(string curScript, string curScriptInfo, List<string> curScriptErrors)
         {
             txtScript.Text = curScript;
+            txtScript.Select(0, 0);
             txtScriptInfo.Text = curScriptInfo;
             btnDefaultScript.Visible = (curScript == "");
             SetScriptErrors(curScriptErrors);
@@ -38,6 +39,37 @@ namespace MissileRangeCalculator
                     txtErrors.AppendText(error);
                     txtErrors.AppendText(Environment.NewLine);
                 }
+            }
+        }
+
+        public void ShowScriptStage(float time, ScriptModule scriptModule)
+        {
+            int scriptInfoIndex = -1;
+            List<ScriptInfo> scriptInfo = ScriptInfo.AnalyzeScriptInfo(txtScriptInfo.Text, scriptModule);
+            for (int i = 0; i < scriptInfo.Count; ++i)
+            {
+                if (scriptInfo[i].timeStart <= time && scriptInfo[i].timeEnd > time)
+                {
+                    scriptInfoIndex = i;
+                    break;
+                }
+            }
+            if (scriptInfoIndex >= 0)
+            {
+                int lineStart = txtScriptInfo.GetFirstCharIndexFromLine(scriptInfoIndex);
+                if (scriptInfoIndex < scriptInfo.Count - 1)
+                {
+                    int lineEnd = txtScriptInfo.GetFirstCharIndexFromLine(scriptInfoIndex + 1) - Environment.NewLine.Length;
+                    txtScriptInfo.Select(lineStart, lineEnd - lineStart);
+                }
+                else
+                {
+                    txtScriptInfo.Select(lineStart, txtScriptInfo.Text.Length - lineStart);
+                }
+            }
+            else
+            {
+                txtScriptInfo.DeselectAll();
             }
         }
 
@@ -92,7 +124,8 @@ namespace MissileRangeCalculator
                 }
                 foreach (MethodInfo mi in t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
                 {
-                    methodNode.Nodes.Add(ReflectionUtils.GetModifierStr(mi) + (mi.ReturnType != null ? ReflectionUtils.GetClassName(mi.ReturnType) : "void") + " " + mi.Name + "(...)").NodeFont = (mi.GetCustomAttribute<StartMethodAttribute>() != null ? BoldNodeFont : (mi.GetCustomAttribute<UpdateMethodAttribute>() != null ? BoldNodeFont : NormalNodeFont));
+                    bool useBoldFont = mi.GetCustomAttribute<StartMethodAttribute>() != null || mi.GetCustomAttribute<UpdateMethodAttribute>() != null || mi.GetCustomAttribute<PostUpdateMethodAttribute>() != null;
+                    methodNode.Nodes.Add(ReflectionUtils.GetModifierStr(mi) + (mi.ReturnType != null ? ReflectionUtils.GetClassName(mi.ReturnType) : "void") + " " + mi.Name + "(" + ReflectionUtils.GetMethodParameters(mi) + ")").NodeFont = (useBoldFont ? BoldNodeFont : NormalNodeFont);
                 }
             }
         }
@@ -182,6 +215,13 @@ public class ScriptFunctions
 	
 	[UpdateMethod]
 	void Update()
+	{
+		simulator.UpdateFrame(deltaTime);
+		simulator.ignoreUpdateFrame = true;
+	}
+	
+	[PostUpdateMethod]
+	void PostUpdate()
 	{
 		
 	}

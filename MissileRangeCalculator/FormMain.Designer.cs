@@ -73,9 +73,14 @@ namespace MissileRangeCalculator
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.btnOpen = new System.Windows.Forms.Button();
             this.btnOpenScript = new System.Windows.Forms.Button();
+            this.splitMotorAngleInput = new System.Windows.Forms.SplitContainer();
             ((System.ComponentModel.ISupportInitialize)(this.picMain)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPlotData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picLegends)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitMotorAngleInput)).BeginInit();
+            this.splitMotorAngleInput.Panel1.SuspendLayout();
+            this.splitMotorAngleInput.Panel2.SuspendLayout();
+            this.splitMotorAngleInput.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtSubsonicDrag
@@ -105,11 +110,14 @@ namespace MissileRangeCalculator
             // 
             // txtMotor
             // 
+            this.txtMotor.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtMotor.HideSelection = false;
-            this.txtMotor.Location = new System.Drawing.Point(12, 58);
+            this.txtMotor.Location = new System.Drawing.Point(0, 0);
             this.txtMotor.Multiline = true;
             this.txtMotor.Name = "txtMotor";
-            this.txtMotor.Size = new System.Drawing.Size(252, 136);
+            this.txtMotor.Size = new System.Drawing.Size(252, 125);
             this.txtMotor.TabIndex = 3;
             this.txtMotor.Text = "7.5,50,276";
             this.txtMotor.MouseUp += new System.Windows.Forms.MouseEventHandler(this.txtMotor_MouseUp);
@@ -253,7 +261,7 @@ namespace MissileRangeCalculator
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(13, 208);
+            this.label9.Location = new System.Drawing.Point(-2, 3);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(149, 12);
             this.label9.TabIndex = 19;
@@ -261,15 +269,17 @@ namespace MissileRangeCalculator
             // 
             // txtPitch
             // 
-            this.txtPitch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtPitch.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtPitch.HideSelection = false;
-            this.txtPitch.Location = new System.Drawing.Point(12, 228);
+            this.txtPitch.Location = new System.Drawing.Point(0, 25);
             this.txtPitch.Multiline = true;
             this.txtPitch.Name = "txtPitch";
-            this.txtPitch.Size = new System.Drawing.Size(252, 126);
+            this.txtPitch.Size = new System.Drawing.Size(252, 141);
             this.txtPitch.TabIndex = 20;
             this.txtPitch.Text = "10,0\r\n10,-0.7\r\n20,-0.8\r\n90,-0.5";
+            this.txtPitch.TextChanged += new System.EventHandler(this.txtPitch_TextChanged);
             this.txtPitch.MouseUp += new System.Windows.Forms.MouseEventHandler(this.txtPitch_MouseUp);
             this.txtPitch.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.txtPitch_MouseWheel);
             // 
@@ -358,9 +368,9 @@ namespace MissileRangeCalculator
             this.picPlotData.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.picPlotData.BackColor = System.Drawing.Color.DarkBlue;
             this.picPlotData.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.picPlotData.Location = new System.Drawing.Point(12, 366);
+            this.picPlotData.Location = new System.Drawing.Point(12, 362);
             this.picPlotData.Name = "picPlotData";
-            this.picPlotData.Size = new System.Drawing.Size(252, 237);
+            this.picPlotData.Size = new System.Drawing.Size(252, 241);
             this.picPlotData.TabIndex = 30;
             this.picPlotData.TabStop = false;
             // 
@@ -448,7 +458,7 @@ namespace MissileRangeCalculator
             // 
             // btnOpenScript
             // 
-            this.btnOpenScript.Location = new System.Drawing.Point(177, 204);
+            this.btnOpenScript.Location = new System.Drawing.Point(166, -1);
             this.btnOpenScript.Name = "btnOpenScript";
             this.btnOpenScript.Size = new System.Drawing.Size(87, 20);
             this.btnOpenScript.TabIndex = 38;
@@ -456,13 +466,37 @@ namespace MissileRangeCalculator
             this.btnOpenScript.UseVisualStyleBackColor = true;
             this.btnOpenScript.Click += new System.EventHandler(this.btnOpenScript_Click);
             // 
+            // splitMotorAngleInput
+            // 
+            this.splitMotorAngleInput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.splitMotorAngleInput.Location = new System.Drawing.Point(12, 58);
+            this.splitMotorAngleInput.Name = "splitMotorAngleInput";
+            this.splitMotorAngleInput.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitMotorAngleInput.Panel1
+            // 
+            this.splitMotorAngleInput.Panel1.Controls.Add(this.txtMotor);
+            this.splitMotorAngleInput.Panel1MinSize = 125;
+            // 
+            // splitMotorAngleInput.Panel2
+            // 
+            this.splitMotorAngleInput.Panel2.Controls.Add(this.label9);
+            this.splitMotorAngleInput.Panel2.Controls.Add(this.btnOpenScript);
+            this.splitMotorAngleInput.Panel2.Controls.Add(this.txtPitch);
+            this.splitMotorAngleInput.Panel2MinSize = 125;
+            this.splitMotorAngleInput.Size = new System.Drawing.Size(252, 297);
+            this.splitMotorAngleInput.SplitterDistance = 125;
+            this.splitMotorAngleInput.SplitterWidth = 6;
+            this.splitMotorAngleInput.TabIndex = 39;
+            // 
             // FormMain
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1044, 611);
-            this.Controls.Add(this.btnOpenScript);
+            this.Controls.Add(this.splitMotorAngleInput);
             this.Controls.Add(this.btnOpen);
             this.Controls.Add(this.btnSaveAs);
             this.Controls.Add(this.btnCopy);
@@ -480,8 +514,6 @@ namespace MissileRangeCalculator
             this.Controls.Add(this.label11);
             this.Controls.Add(this.txtTargetSpeed);
             this.Controls.Add(this.label10);
-            this.Controls.Add(this.txtPitch);
-            this.Controls.Add(this.label9);
             this.Controls.Add(this.picMain);
             this.Controls.Add(this.txtInitAngle);
             this.Controls.Add(this.label8);
@@ -497,7 +529,6 @@ namespace MissileRangeCalculator
             this.Controls.Add(this.label3);
             this.Controls.Add(this.txtDryMass);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.txtMotor);
             this.Controls.Add(this.txtSupersonicDrag);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtSubsonicDrag);
@@ -517,6 +548,12 @@ namespace MissileRangeCalculator
             ((System.ComponentModel.ISupportInitialize)(this.picMain)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPlotData)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picLegends)).EndInit();
+            this.splitMotorAngleInput.Panel1.ResumeLayout(false);
+            this.splitMotorAngleInput.Panel1.PerformLayout();
+            this.splitMotorAngleInput.Panel2.ResumeLayout(false);
+            this.splitMotorAngleInput.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitMotorAngleInput)).EndInit();
+            this.splitMotorAngleInput.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -564,6 +601,7 @@ namespace MissileRangeCalculator
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.Button btnOpen;
         private Button btnOpenScript;
+        private SplitContainer splitMotorAngleInput;
     }
 }
 

@@ -328,22 +328,28 @@ namespace MissileRangeCalculator
                 {
                     txtPitch.Text += lines[lineIndex++] + (i < pitchLineCount - 1 ? Environment.NewLine : "");
                 }
-                uint scriptInfoLineCount = uint.Parse(lines[lineIndex++]);
-                curScriptInfo = "";
-                for (uint i = 0; i < scriptInfoLineCount; ++i)
+                if(lineIndex <= lines.Length - 1) // Backward compatibility of old saved mrc files
                 {
-                    curScriptInfo += lines[lineIndex++] + (i < scriptInfoLineCount - 1 ? Environment.NewLine : "");
-                }
-                uint scriptLineCount = uint.Parse(lines[lineIndex++]);
-                curScript = "";
-                for (uint i = 0; i < scriptLineCount; ++i)
-                {
-                    curScript += lines[lineIndex++] + (i < scriptLineCount - 1 ? Environment.NewLine : "");
-                }
-                CompileScript();
-                if (formScriptEditor != null)
-                {
-                    formScriptEditor.SetScriptData(curScript, curScriptInfo, curScriptErrors);
+                    uint scriptInfoLineCount = uint.Parse(lines[lineIndex++]);
+                    curScriptInfo = "";
+                    for (uint i = 0; i < scriptInfoLineCount; ++i)
+                    {
+                        curScriptInfo += lines[lineIndex++] + (i < scriptInfoLineCount - 1 ? Environment.NewLine : "");
+                    }
+                    uint scriptLineCount = uint.Parse(lines[lineIndex++]);
+                    curScript = "";
+                    for (uint i = 0; i < scriptLineCount; ++i)
+                    {
+                        curScript += lines[lineIndex++] + (i < scriptLineCount - 1 ? Environment.NewLine : "");
+                    }
+                    CompileScript();
+                    if (formScriptEditor != null)
+                    {
+                        formScriptEditor.SetScriptData(curScript, curScriptInfo, curScriptErrors);
+                        Assembly compiledAssembly = curScriptModule.GetCompiledAssembly();
+                        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                        formScriptEditor.SetAssemblyTreeView(compiledAssembly, assemblies);
+                    }
                 }
             }
         }
@@ -425,6 +431,10 @@ namespace MissileRangeCalculator
             else
             {
                 txtPitch.DeselectAll();
+            }
+            if (formScriptEditor != null)
+            {
+                formScriptEditor.ShowScriptStage(time, curScriptModule);
             }
         }
 
@@ -565,13 +575,18 @@ namespace MissileRangeCalculator
             {
                 formScriptEditor = new FormScriptEditor();
                 formScriptEditor.SetScriptData(curScript, curScriptInfo, curScriptErrors);
+                if (simulator != null && simulator.plotter.prevCheckFrame != -1)
+                    formScriptEditor.ShowScriptStage(simulator.deltaTime * (simulator.plotter.prevCheckFrame + 1), curScriptModule); 
                 var assemblies = AppDomain.CurrentDomain.GetAssemblies();
                 formScriptEditor.SetAssemblyTreeView(curScriptModule == null ? null : curScriptModule.GetCompiledAssembly(), assemblies);
                 formScriptEditor.Show(this);
             }
             else
             {
-                formScriptEditor.Show(this);
+                if (formScriptEditor.Visible == false)
+                    formScriptEditor.Show(this);
+                else
+                    formScriptEditor.Focus();
             }
         }
 
@@ -606,6 +621,11 @@ namespace MissileRangeCalculator
                     formScriptEditor = null;
                     break;
             }
+        }
+
+        private void txtPitch_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

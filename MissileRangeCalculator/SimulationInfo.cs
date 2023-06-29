@@ -285,7 +285,52 @@ namespace MissileRangeCalculator
                 float time = float.Parse(components[0]);
 
                 string script = lines[i].Substring(lines[i].IndexOf(',') + 1);
-                if (script.Trim() != "" && script.Trim().ToLower() != "null")
+                List<object> scriptComponents = SplitScriptInfo(script, scriptModule);
+                scriptInfo.Add(new ScriptInfo(timeElapsed, timeElapsed + time, (MethodInfo)scriptComponents[0], (object[])scriptComponents[1], (MethodInfo)scriptComponents[2], (object[])scriptComponents[3]));
+                
+                timeElapsed += time;
+            }
+
+            return scriptInfo;
+        }
+
+        private static List<object> SplitScriptInfo(string scriptInfo, ScriptModule scriptModule)
+        {
+            List<object> result = new List<object>();
+
+            string[] components = new string[2] { null, null };
+            int bracketLevel = 0;
+            int lastSplitPos = 0;
+            int curPos = 0;
+            int index = 0;
+            var enumerator = scriptInfo.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                var chr = enumerator.Current;
+                if (chr == '(')
+                    bracketLevel++;
+                else if (chr == ')')
+                    bracketLevel--;
+                if (chr == ',' && bracketLevel == 0)
+                {
+                    components[index] = (scriptInfo.Substring(lastSplitPos, curPos - lastSplitPos).Trim());
+                    lastSplitPos = curPos + 1;
+                    index++;
+                }
+                curPos++;
+            }
+            if (bracketLevel == 0)
+            {
+                components[index] = (scriptInfo.Substring(lastSplitPos, curPos - lastSplitPos).Trim());
+            }
+
+            foreach (string script in components)
+            {
+                if (script == null || script == "" || script.ToLower() == "null")
+                {
+                    result.Add(null); result.Add(null);
+                }
+                else
                 {
                     int bracketBegin = script.IndexOf('(');
                     int bracketEnd = script.LastIndexOf(')');
@@ -297,7 +342,7 @@ namespace MissileRangeCalculator
                         var mi = methods[scriptFuncName];
                         var pis = mi.GetParameters();
                         string[] scriptParameters = scriptParams.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                        if(pis.Length == scriptParameters.Length)
+                        if (pis.Length == scriptParameters.Length)
                         {
                             var scriptParameterObjs = new object[pis.Length];
                             for (int j = 0; j < pis.Length; ++j)
@@ -312,46 +357,59 @@ namespace MissileRangeCalculator
                                 {
                                     scriptParameterObjs[j] = float.Parse(trimmed.TrimEnd('f'));
                                 }
-                                else if(paramType == typeof(double))
+                                else if (paramType == typeof(double))
                                 {
                                     scriptParameterObjs[j] = double.Parse(trimmed);
                                 }
-                                else if(paramType == typeof(bool))
+                                else if (paramType == typeof(bool))
                                 {
                                     scriptParameterObjs[j] = bool.Parse(trimmed);
                                 }
-                                else if(paramType == typeof(string))
+                                else if (paramType == typeof(string))
                                 {
                                     scriptParameterObjs[j] = trimmed.Substring(1, trimmed.Length - 2);
                                 }
                             }
-                            scriptInfo.Add(new ScriptInfo(timeElapsed, timeElapsed + time, mi, scriptParameterObjs));
+                            result.Add(mi);
+                            result.Add(scriptParameterObjs);
+                        }
+                        else
+                        {
+                            result.Add(null); result.Add(null);
                         }
                     }
+                    result.Add(null); result.Add(null);
                 }
-                
-                timeElapsed += time;
             }
 
-            return scriptInfo;
+            return result;
         }
 
-        public object Execute(object instance)
+        public object ExecutePreUpdate(object instance)
         {
-            return scriptMethod?.Invoke(instance, scriptMethodParams);
+            return preUpdateScriptMethod?.Invoke(instance, preUpdateScriptMethodParams);
+        }
+
+        public object ExecutePostUpdate(object instance)
+        {
+            return postUpdateScriptMethod?.Invoke(instance, postUpdateScriptMethodParams);
         }
 
         public float timeStart;
         public float timeEnd;
-        public MethodInfo scriptMethod;
-        public object[] scriptMethodParams;
+        public MethodInfo preUpdateScriptMethod;
+        public object[] preUpdateScriptMethodParams;
+        public MethodInfo postUpdateScriptMethod;
+        public object[] postUpdateScriptMethodParams;
 
-        public ScriptInfo(float timeStart, float timeEnd, MethodInfo scriptMethod, object[] scriptMethodParams)
+        public ScriptInfo(float timeStart, float timeEnd, MethodInfo preUpdateScriptMethod, object[] preUpdateScriptMethodParams, MethodInfo postUpdateScriptMethod, object[] postUpdateScriptMethodParams)
         {
             this.timeStart = timeStart;
             this.timeEnd = timeEnd;
-            this.scriptMethod = scriptMethod;
-            this.scriptMethodParams = scriptMethodParams;
+            this.preUpdateScriptMethod = preUpdateScriptMethod;
+            this.preUpdateScriptMethodParams = preUpdateScriptMethodParams;
+            this.postUpdateScriptMethod = postUpdateScriptMethod;
+            this.postUpdateScriptMethodParams = postUpdateScriptMethodParams;
         }
     }
 }

@@ -434,16 +434,18 @@ namespace MissileRangeCalculator
 
         public bool ignoreUpdateFrame = false;
 
-        public void UpdateFrame(float deltaTime)
+        public void UpdateFrame(float deltaTime, bool ignorePitchUpdate = false, bool ignoreDrag = false, bool ignoreThrust = false, bool ignoreGravity = false)
         {
             curMass = GetMass(curTime);
             float newAngle = UpdatePitchAngle(curTime, deltaTime, curMass);
+            newAngle = (ignorePitchUpdate ? curAngle : newAngle);
             float deltaAngle = newAngle - curAngle;
             float engineAngle = GetEngineAngle(curTime);
 
             float curDrag = CalculateDrag((float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, curTime, out curLiftAcc, out curCLReq);
+            curDrag = (ignoreDrag ? 0f : curDrag);
             curDragAcc = curDrag / curMass;
-            curAcc = (GetThrust(curTime) * (float)Math.Cos(engineAngle * Math.PI / 180f) - curDrag) / curMass - (float)(GetLocalG() * Math.Sin(curAngle * Math.PI / 180f));
+            curAcc = ((ignoreThrust ? 0f : GetThrust(curTime)) * (float)Math.Cos(engineAngle * Math.PI / 180f) - curDrag) / curMass - (float)((ignoreGravity ? 0f : GetLocalG()) * Math.Sin(curAngle * Math.PI / 180f));
             curAngle = newAngle;
             curSpeed = curSpeed + curAcc * deltaTime;
             float curHorSpeed = curSpeed * (float)(Math.Cos(curAngle * Math.PI / 180f));
@@ -480,17 +482,19 @@ namespace MissileRangeCalculator
                 for (int i = 0; i < (int)(deltaTime / accuracy); ++i)
                 {
                     ignoreUpdateFrame = false;
-                    scriptInstance.ExecuteUpdate();
-                    GetScriptInfo(curTime)?.Execute(scriptInstance.GetDefaultClassInstance());
+                    scriptInstance?.ExecuteUpdate();
+                    GetScriptInfo(curTime)?.ExecutePreUpdate(scriptInstance.GetDefaultClassInstance());
                     if(ignoreUpdateFrame == false)
                     {
                         UpdateFrame(accuracy);
                     }
+                    GetScriptInfo(curTime)?.ExecutePostUpdate(scriptInstance.GetDefaultClassInstance());
+                    scriptInstance?.ExecutePostUpdate();
                     curTime += accuracy;
                 }
                 downRangeData.Add(new Tuple<double, double>(curHorDistance, curAlt));
                 plotter.Record(curFrame, curTime, curMass, curHorDistance, curHorDistance39,
-                    curAlt, curSpeed, TAStoIAS(curSpeed, curAlt), TAStoMach(curSpeed, curAlt), curAcc, curLiftAcc / 9.81f, (Math.Abs(curLiftAcc) > 0.005 && curDragAcc > 0 ? Math.Abs(curLiftAcc) / curDragAcc : 0.0f), curCLReq, curAngle,
+                    curAlt, curSpeed, TAStoIAS(curSpeed, curAlt), TAStoMach(curSpeed, curAlt), curAcc, curLiftAcc / 9.81f, (Math.Abs(curLiftAcc) > 0.005 && curDragAcc > 0 ? curLiftAcc / curDragAcc : 0.0f), curCLReq, curAngle,
                     curTargetDistance1, curTargetDistance2, curTargetDistance39);
                 //curTime += deltaTime;
                 curFrame++;

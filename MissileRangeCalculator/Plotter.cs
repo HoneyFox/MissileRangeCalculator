@@ -192,7 +192,8 @@ namespace MissileRangeCalculator
                 graphics.DrawLine(Pens.Yellow, data.frame - 1, (float)(prevData.horDistance39 / maxDistance) * target.Height * 0.9f, data.frame, (float)(data.horDistance39 / maxDistance) * target.Height * 0.9f);
 
                 graphics.DrawLine(Pens.Magenta, data.frame - 1, target.Height * 0.667f + prevData.angle * 1f, data.frame, target.Height * 0.667f + data.angle * 1f);
-                graphics.DrawLine(Pens.Black, data.frame - 1, target.Height * 0.667f + prevData.ldRatio * 40f * scale, data.frame, target.Height * 0.667f + data.ldRatio * 40f * scale);
+                graphics.DrawLine(Pens.Black, data.frame - 1, target.Height * 0.667f + Math.Abs(prevData.ldRatio) * 40f * scale, data.frame, target.Height * 0.667f + Math.Abs(data.ldRatio) * 40f * scale);
+                graphics.DrawLine(Pens.DarkGray, data.frame - 1, target.Height * 0.667f + prevData.ldRatio * 40f * scale, data.frame, target.Height * 0.667f + data.ldRatio * 40f * scale);
                 graphics.DrawLine(Pens.White, data.frame - 1, target.Height * 0.667f, data.frame, target.Height * 0.667f);
             }
 

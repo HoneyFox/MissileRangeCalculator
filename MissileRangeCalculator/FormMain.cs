@@ -328,7 +328,7 @@ namespace MissileRangeCalculator
                 {
                     txtPitch.Text += lines[lineIndex++] + (i < pitchLineCount - 1 ? Environment.NewLine : "");
                 }
-                if(lineIndex <= lines.Length - 1) // Backward compatibility of old saved mrc files
+                if (lineIndex <= lines.Length - 1) // Backward compatibility of old saved mrc files
                 {
                     uint scriptInfoLineCount = uint.Parse(lines[lineIndex++]);
                     curScriptInfo = "";
@@ -342,14 +342,19 @@ namespace MissileRangeCalculator
                     {
                         curScript += lines[lineIndex++] + (i < scriptLineCount - 1 ? Environment.NewLine : "");
                     }
-                    CompileScript();
-                    if (formScriptEditor != null)
-                    {
-                        formScriptEditor.SetScriptData(curScript, curScriptInfo, curScriptErrors);
-                        Assembly compiledAssembly = curScriptModule.GetCompiledAssembly();
-                        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                        formScriptEditor.SetAssemblyTreeView(compiledAssembly, assemblies);
-                    }
+                }
+                else // Old saved mrc files have no script/script info.
+                {
+                    curScriptInfo = "";
+                    curScript = "";
+                }
+                CompileScript();
+                if (formScriptEditor != null)
+                {
+                    formScriptEditor.SetScriptData(curScript, curScriptInfo, curScriptErrors);
+                    Assembly compiledAssembly = (curScriptModule != null ? curScriptModule.GetCompiledAssembly() : null);
+                    var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                    formScriptEditor.SetAssemblyTreeView(compiledAssembly, assemblies);
                 }
             }
         }
@@ -360,6 +365,7 @@ namespace MissileRangeCalculator
             {
                 curScriptModule = null;
                 curScriptInstance = null;
+                curScriptErrors = null;
                 return;
             }
 
@@ -621,11 +627,6 @@ namespace MissileRangeCalculator
                     formScriptEditor = null;
                     break;
             }
-        }
-
-        private void txtPitch_TextChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }

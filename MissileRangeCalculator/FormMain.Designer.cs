@@ -279,7 +279,6 @@ namespace MissileRangeCalculator
             this.txtPitch.Size = new System.Drawing.Size(252, 141);
             this.txtPitch.TabIndex = 20;
             this.txtPitch.Text = "10,0\r\n10,-0.7\r\n20,-0.8\r\n90,-0.5";
-            this.txtPitch.TextChanged += new System.EventHandler(this.txtPitch_TextChanged);
             this.txtPitch.MouseUp += new System.Windows.Forms.MouseEventHandler(this.txtPitch_MouseUp);
             this.txtPitch.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.txtPitch_MouseWheel);
             // 

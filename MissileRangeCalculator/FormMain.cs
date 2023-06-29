@@ -32,6 +32,7 @@ namespace MissileRangeCalculator
         {
             InitializeComponent();
             singleton = this;
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(Application.ExecutablePath));
         }
 
         private void FormMain_Load(object sender, EventArgs e)

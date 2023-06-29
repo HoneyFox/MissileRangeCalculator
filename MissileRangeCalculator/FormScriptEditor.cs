@@ -249,6 +249,7 @@ public class ScriptFunctions
             int lineStart = txtErrors.GetFirstCharIndexFromLine(lineIndex);
             var bracketStart = txtErrors.Text.IndexOf('(', lineStart);
             var bracketEnd = txtErrors.Text.IndexOf(')', lineStart);
+            if (bracketStart == -1 || bracketEnd == -1) return;
             var components = txtErrors.Text.Substring(bracketStart + 1, bracketEnd - bracketStart - 1).Split(',');
             var scriptLineIndex = int.Parse(components[0]) - 1;
 

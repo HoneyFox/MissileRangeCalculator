@@ -395,7 +395,7 @@ namespace MissileRangeCalculator
             float drag0 = GetDragCoeff(TAStoMach(curSpeed, curAlt), time) * refArea(time) * dynPressure;
             float accForStraightFlight = (float)(Math.Cos(curAngle * Math.PI / 180f) * GetNetG());
             float curAcc = angleRate * curSpeed;
-            liftAcc = (curAcc + accForStraightFlight - (float)(Math.Sin(GetEngineAngle(curTime) * Math.PI / 180f) * GetThrust(curTime) / mass));
+            liftAcc = (curAcc + accForStraightFlight - (float)(Math.Sin(GetEngineAngle(time) * Math.PI / 180f) * GetThrust(time) / mass));
             float liftForce = liftAcc * mass;
             float dragL = 0f;
             if (dynPressure > 0)
@@ -434,18 +434,18 @@ namespace MissileRangeCalculator
 
         public bool ignoreUpdateFrame = false;
 
-        public void UpdateFrame(float deltaTime, bool ignorePitchUpdate = false, bool ignoreDrag = false, bool ignoreThrust = false, bool ignoreGravity = false)
+        public void UpdateFrame(float deltaTime, bool overridePitchUpdate = false, bool overrideDrag = false, bool overrideThrust = false, bool overrideGravity = false, float pitch = 0f, float drag = 0f, float thrust = 0f, float gravity = 0f)
         {
             curMass = GetMass(curTime);
             float newAngle = UpdatePitchAngle(curTime, deltaTime, curMass);
-            newAngle = (ignorePitchUpdate ? curAngle : newAngle);
+            newAngle = (overridePitchUpdate ? pitch : newAngle);
             float deltaAngle = newAngle - curAngle;
             float engineAngle = GetEngineAngle(curTime);
 
             float curDrag = CalculateDrag((float)(deltaAngle / deltaTime * Math.PI / 180f), curMass, curTime, out curLiftAcc, out curCLReq);
-            curDrag = (ignoreDrag ? 0f : curDrag);
+            curDrag = (overrideDrag ? drag : curDrag);
             curDragAcc = curDrag / curMass;
-            curAcc = ((ignoreThrust ? 0f : GetThrust(curTime)) * (float)Math.Cos(engineAngle * Math.PI / 180f) - curDrag) / curMass - (float)((ignoreGravity ? 0f : GetLocalG()) * Math.Sin(curAngle * Math.PI / 180f));
+            curAcc = ((overrideThrust ? thrust : GetThrust(curTime)) * (float)Math.Cos(engineAngle * Math.PI / 180f) - curDrag) / curMass - (float)((overrideGravity ? gravity : GetLocalG()) * Math.Sin(curAngle * Math.PI / 180f));
             curAngle = newAngle;
             curSpeed = curSpeed + curAcc * deltaTime;
             float curHorSpeed = curSpeed * (float)(Math.Cos(curAngle * Math.PI / 180f));

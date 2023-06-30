@@ -329,7 +329,7 @@ namespace MissileRangeCalculator
                 {
                     txtPitch.Text += lines[lineIndex++] + (i < pitchLineCount - 1 ? Environment.NewLine : "");
                 }
-                if (lineIndex <= lines.Length - 1) // Backward compatibility of old saved mrc files
+                if (lineIndex < lines.Length - 1) // Backward compatibility of old saved mrc files
                 {
                     uint scriptInfoLineCount = uint.Parse(lines[lineIndex++]);
                     curScriptInfo = "";

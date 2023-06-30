@@ -221,7 +221,7 @@
             this.lblScriptInfo.Name = "lblScriptInfo";
             this.lblScriptInfo.Size = new System.Drawing.Size(167, 12);
             this.lblScriptInfo.TabIndex = 11;
-            this.lblScriptInfo.Text = "T,UpdateFunc,PostUpdateFunc";
+            this.lblScriptInfo.Text = "T/T*(OnlyOnce),UpdateFunc,PostUpdateFunc";
             // 
             // FormScriptEditor
             // 

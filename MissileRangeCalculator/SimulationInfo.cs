@@ -282,15 +282,14 @@ namespace MissileRangeCalculator
             for (int i = 0; i < lines.Length; ++i)
             {
                 string[] components = lines[i].Split(new char[] { ',' }, StringSplitOptions.None);
-                float time = float.Parse(components[0]);
-
+                bool onlyOnce = components[0].EndsWith("*");
+                float time = float.Parse(components[0].TrimEnd('*'));
                 string script = lines[i].Substring(lines[i].IndexOf(',') + 1);
                 List<object> scriptComponents = SplitScriptInfo(script, scriptModule);
-                scriptInfo.Add(new ScriptInfo(timeElapsed, timeElapsed + time, (MethodInfo)scriptComponents[0], (object[])scriptComponents[1], (MethodInfo)scriptComponents[2], (object[])scriptComponents[3]));
-                
+                scriptInfo.Add(new ScriptInfo(timeElapsed, timeElapsed + time, (MethodInfo)scriptComponents[0], (object[])scriptComponents[1], (MethodInfo)scriptComponents[2], (object[])scriptComponents[3], onlyOnce));
+
                 timeElapsed += time;
             }
-
             return scriptInfo;
         }
 
@@ -387,25 +386,37 @@ namespace MissileRangeCalculator
 
         public object ExecutePreUpdate(object instance)
         {
-            return preUpdateScriptMethod?.Invoke(instance, preUpdateScriptMethodParams);
+            if (invokeOnlyOnce == false || invoked == false)
+            {
+                return preUpdateScriptMethod?.Invoke(instance, preUpdateScriptMethodParams);
+            }
+            return null;
         }
 
         public object ExecutePostUpdate(object instance)
         {
-            return postUpdateScriptMethod?.Invoke(instance, postUpdateScriptMethodParams);
+            if (invokeOnlyOnce == false || invoked == false)
+            {
+                invoked = true;
+                return postUpdateScriptMethod?.Invoke(instance, postUpdateScriptMethodParams);
+            }
+            return null;
         }
 
         public float timeStart;
         public float timeEnd;
+        public bool invokeOnlyOnce;
+        private bool invoked = false;
         public MethodInfo preUpdateScriptMethod;
         public object[] preUpdateScriptMethodParams;
         public MethodInfo postUpdateScriptMethod;
         public object[] postUpdateScriptMethodParams;
 
-        public ScriptInfo(float timeStart, float timeEnd, MethodInfo preUpdateScriptMethod, object[] preUpdateScriptMethodParams, MethodInfo postUpdateScriptMethod, object[] postUpdateScriptMethodParams)
+        public ScriptInfo(float timeStart, float timeEnd, MethodInfo preUpdateScriptMethod, object[] preUpdateScriptMethodParams, MethodInfo postUpdateScriptMethod, object[] postUpdateScriptMethodParams, bool invokeOnlyOnce = false)
         {
             this.timeStart = timeStart;
             this.timeEnd = timeEnd;
+            this.invokeOnlyOnce = invokeOnlyOnce;
             this.preUpdateScriptMethod = preUpdateScriptMethod;
             this.preUpdateScriptMethodParams = preUpdateScriptMethodParams;
             this.postUpdateScriptMethod = postUpdateScriptMethod;

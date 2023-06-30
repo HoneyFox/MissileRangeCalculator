@@ -434,9 +434,9 @@ namespace MissileRangeCalculator
 
         public bool ignoreUpdateFrame = false;
 
-        public void UpdateFrame(float deltaTime, bool overridePitchUpdate = false, bool overrideDrag = false, bool overrideThrust = false, bool overrideGravity = false, float pitch = 0f, float drag = 0f, float thrust = 0f, float gravity = 0f)
+        public void UpdateFrame(float deltaTime, bool overrideMass = false, bool overridePitchUpdate = false, bool overrideDrag = false, bool overrideThrust = false, bool overrideGravity = false, float mass = 0f, float pitch = 0f, float drag = 0f, float thrust = 0f, float gravity = 0f)
         {
-            curMass = GetMass(curTime);
+            curMass = overrideMass ? mass : GetMass(curTime);
             float newAngle = UpdatePitchAngle(curTime, deltaTime, curMass);
             newAngle = (overridePitchUpdate ? pitch : newAngle);
             float deltaAngle = newAngle - curAngle;

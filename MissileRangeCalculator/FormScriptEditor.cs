@@ -203,6 +203,23 @@ namespace MissileRangeCalculator
 [DefaultClass]
 public class ScriptFunctions
 {
+	static void Log(string log)
+	{
+		FormMain.singleton.AddScriptLog(log);
+	}
+	
+	static void DLog(string log)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.Append(""Frame"").Append(FormMain.singleton.simulator.curFrame).Append(""@"").Append(FormMain.singleton.simulator.curTime).Append(""sec: "").Append(log);
+		FormMain.singleton.AddScriptLog(sb.ToString());
+	}
+	
+	static void ClearLog()
+	{
+		FormMain.singleton.ClearScriptLog();
+	}
+	
 	Simulator simulator = null;
 	float deltaTime = 1f / 64f;
 	

@@ -574,7 +574,7 @@ namespace MissileRangeCalculator
             }
         }
 
-
+        #region FormScriptEditor
         FormScriptEditor formScriptEditor = null;
         private void btnOpenScript_Click(object sender, EventArgs e)
         {
@@ -605,7 +605,7 @@ namespace MissileRangeCalculator
 
         public void ScriptEditorCallback(ScriptEditorOperation operation)
         {
-            switch(operation)
+            switch (operation)
             {
                 case ScriptEditorOperation.Apply:
                     bool scriptChanged = (curScript != formScriptEditor.GetScript());
@@ -616,7 +616,7 @@ namespace MissileRangeCalculator
                         formScriptEditor.SetScriptErrors(curScriptErrors);
 
                         Assembly compiledAssembly = null;
-                        if(curScriptErrors == null)
+                        if (curScriptErrors == null)
                             compiledAssembly = curScriptModule.GetCompiledAssembly();
                         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
                         formScriptEditor.SetAssemblyTreeView(compiledAssembly, assemblies);
@@ -629,5 +629,49 @@ namespace MissileRangeCalculator
                     break;
             }
         }
+        #endregion
+
+        #region FormScriptLog
+        FormScriptLog formScriptLog = null;
+        public void AddScriptLog(string log)
+        {
+            if (formScriptLog == null)
+            {
+                formScriptLog = new FormScriptLog();
+                formScriptLog.AddLog(log);
+                formScriptLog.Show(this);
+            }
+            else
+            {
+                formScriptLog.AddLog(log);
+                if (formScriptLog.Visible == false)
+                    formScriptLog.Show(this);
+            }
+        }
+
+        public void ClearScriptLog()
+        {
+            if (formScriptLog != null)
+            {
+                formScriptLog.ClearLog();
+            }
+        }
+
+        public enum ScriptLogOperation
+        {
+            Close = 1,
+        }
+
+        public void ScriptLogCallback(ScriptLogOperation operation)
+        {
+            switch (operation)
+            {
+                case ScriptLogOperation.Close:
+                    formScriptLog.Dispose();
+                    formScriptLog = null;
+                    break;
+            }
+        }
+        #endregion
     }
 }

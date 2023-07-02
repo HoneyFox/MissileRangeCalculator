@@ -26,9 +26,9 @@ MRCData
 90,-5g,-60
 4
 50,null,null
-1*,ActivateScramjet(300, 1000, 8000, 50, 5),null
-896,null,null
-1*,ActivateSRB(6, 150, 255)
+*,ActivateScramjet(300, 1000, 8000, 50, 5),null
+897,null,null
+*,ActivateSRB(6, 150, 255)
 262
 using MissileRangeCalculator;
 

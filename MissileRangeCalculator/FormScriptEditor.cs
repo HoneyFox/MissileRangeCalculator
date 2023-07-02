@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Serialization;
 
 namespace MissileRangeCalculator
 {
@@ -111,9 +112,14 @@ namespace MissileRangeCalculator
             {
                 var classNode = assemblyNode.Nodes.Add("class " + t.Name);
                 classNode.NodeFont = (t.GetCustomAttribute<DefaultClassAttribute>() != null ? BoldNodeFont : NormalNodeFont);
+                var ctorNode = classNode.Nodes.Add("Constructors");
                 var fieldNode = classNode.Nodes.Add("Fields");
                 var propertyNode = classNode.Nodes.Add("Properties");
                 var methodNode = classNode.Nodes.Add("Methods");
+                foreach (ConstructorInfo ci in t.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
+                {
+                    ctorNode.Nodes.Add(ReflectionUtils.GetModifierStr(ci) + " " + ci.Name + "(" + ReflectionUtils.GetConstructorParameters(ci) + ")");
+                }
                 foreach (FieldInfo fi in t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
                 {
                     fieldNode.Nodes.Add(ReflectionUtils.GetModifierStr(fi) + ReflectionUtils.GetClassName(fi.FieldType) + " " + fi.Name).NodeFont = (fi.FieldType.GetCustomAttribute<ExchangeDataAttribute>() != null ? BoldNodeFont : NormalNodeFont);

@@ -219,9 +219,9 @@
             this.lblScriptInfo.AutoSize = true;
             this.lblScriptInfo.Location = new System.Drawing.Point(0, 3);
             this.lblScriptInfo.Name = "lblScriptInfo";
-            this.lblScriptInfo.Size = new System.Drawing.Size(167, 12);
+            this.lblScriptInfo.Size = new System.Drawing.Size(221, 12);
             this.lblScriptInfo.TabIndex = 11;
-            this.lblScriptInfo.Text = "T/T*(OnlyOnce),UpdateFunc,PostUpdateFunc";
+            this.lblScriptInfo.Text = "T(Range)/*,UpdateFunc,PostUpdateFunc";
             // 
             // FormScriptEditor
             // 

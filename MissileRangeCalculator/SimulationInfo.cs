@@ -282,13 +282,35 @@ namespace MissileRangeCalculator
             for (int i = 0; i < lines.Length; ++i)
             {
                 string[] components = lines[i].Split(new char[] { ',' }, StringSplitOptions.None);
-                bool onlyOnce = components[0].EndsWith("*");
-                float time = float.Parse(components[0].TrimEnd('*'));
-                string script = lines[i].Substring(lines[i].IndexOf(',') + 1);
-                List<object> scriptComponents = SplitScriptInfo(script, scriptModule);
-                scriptInfo.Add(new ScriptInfo(timeElapsed, timeElapsed + time, (MethodInfo)scriptComponents[0], (object[])scriptComponents[1], (MethodInfo)scriptComponents[2], (object[])scriptComponents[3], onlyOnce));
+                bool onlyOnce = (components[0] == "*");
+                bool timeRange = components[0].Contains("~");
+                if (timeRange == false)
+                {
+                    if (onlyOnce == false)
+                    {
+                        float time = float.Parse(components[0]);
+                        string script = lines[i].Substring(lines[i].IndexOf(',') + 1);
+                        List<object> scriptComponents = SplitScriptInfo(script, scriptModule);
+                        scriptInfo.Add(new ScriptInfo(timeElapsed, timeElapsed + time, (MethodInfo)scriptComponents[0], (object[])scriptComponents[1], (MethodInfo)scriptComponents[2], (object[])scriptComponents[3], onlyOnce));
 
-                timeElapsed += time;
+                        timeElapsed += time;
+                    }
+                    else
+                    {
+                        string script = lines[i].Substring(lines[i].IndexOf(',') + 1);
+                        List<object> scriptComponents = SplitScriptInfo(script, scriptModule);
+                        scriptInfo.Add(new ScriptInfo(timeElapsed, timeElapsed + 0.125f, (MethodInfo)scriptComponents[0], (object[])scriptComponents[1], (MethodInfo)scriptComponents[2], (object[])scriptComponents[3], onlyOnce));
+                    }
+                }
+                else
+                {
+                    string[] timeRangeComponents = components[0].Split('~');
+                    float timeStart = float.Parse(timeRangeComponents[0]);
+                    float timeEnd = float.Parse(timeRangeComponents[1]);
+                    string script = lines[i].Substring(lines[i].IndexOf(',') + 1);
+                    List<object> scriptComponents = SplitScriptInfo(script, scriptModule);
+                    scriptInfo.Add(new ScriptInfo(timeStart, timeEnd, (MethodInfo)scriptComponents[0], (object[])scriptComponents[1], (MethodInfo)scriptComponents[2], (object[])scriptComponents[3], onlyOnce));
+                }
             }
             return scriptInfo;
         }
@@ -377,7 +399,10 @@ namespace MissileRangeCalculator
                             result.Add(null); result.Add(null);
                         }
                     }
-                    result.Add(null); result.Add(null);
+                    else
+                    {
+                        result.Add(null); result.Add(null);
+                    }
                 }
             }
 
@@ -388,6 +413,7 @@ namespace MissileRangeCalculator
         {
             if (invokeOnlyOnce == false || invoked == false)
             {
+                if (instance == null) return null;
                 return preUpdateScriptMethod?.Invoke(instance, preUpdateScriptMethodParams);
             }
             return null;
@@ -398,6 +424,7 @@ namespace MissileRangeCalculator
             if (invokeOnlyOnce == false || invoked == false)
             {
                 invoked = true;
+                if (instance == null) return null;
                 return postUpdateScriptMethod?.Invoke(instance, postUpdateScriptMethodParams);
             }
             return null;

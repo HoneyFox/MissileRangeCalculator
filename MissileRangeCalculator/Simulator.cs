@@ -163,18 +163,18 @@ namespace MissileRangeCalculator
             return null;
         }
 
-        public ScriptInfo GetScriptInfo(float time)
+        public List<ScriptInfo> GetScriptInfo(float time)
         {
-
+            List<ScriptInfo> result = new List<ScriptInfo>();
             for (int i = 0; i < scriptInfo.Count; ++i)
             {
                 if (scriptInfo[i].timeStart <= time && scriptInfo[i].timeEnd > time)
                 {
-                    return scriptInfo[i];
+                    result.Add(scriptInfo[i]);
                 }
             }
 
-            return null;
+            return result;
         }
 
         public float GetThrust(float time)
@@ -483,12 +483,15 @@ namespace MissileRangeCalculator
                 {
                     ignoreUpdateFrame = false;
                     scriptInstance?.ExecuteUpdate();
-                    GetScriptInfo(curTime)?.ExecutePreUpdate(scriptInstance.GetDefaultClassInstance());
+                    var sis = GetScriptInfo(curTime);
+                    foreach (var si in sis)
+                        si.ExecutePreUpdate(scriptInstance?.GetDefaultClassInstance());
                     if(ignoreUpdateFrame == false)
                     {
                         UpdateFrame(accuracy);
                     }
-                    GetScriptInfo(curTime)?.ExecutePostUpdate(scriptInstance.GetDefaultClassInstance());
+                    foreach (var si in sis)
+                        si.ExecutePostUpdate(scriptInstance?.GetDefaultClassInstance());
                     scriptInstance?.ExecutePostUpdate();
                     curTime += accuracy;
                 }

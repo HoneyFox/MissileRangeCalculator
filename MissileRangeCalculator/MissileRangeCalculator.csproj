@@ -75,6 +75,7 @@
     <Compile Include="FormScriptEditor.Designer.cs">
       <DependentUpon>FormScriptEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="ScriptUtils.cs" />
     <Compile Include="SimulationInfo.cs" />
     <Compile Include="Simulator.cs" />
     <Compile Include="TextBoxExtensions.cs" />

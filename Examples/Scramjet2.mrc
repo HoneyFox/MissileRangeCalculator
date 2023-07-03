@@ -27,10 +27,10 @@ MRCData
 10
 *,ActivateBooster(50,1200,255),null
 50,null,null
-*,SetAltHold(0.002,0.25,33000,15),null
+*,SetAltHold(0.002,0.3,33000,15),null
 *,ActivateScramjet(300,1250,7200,6.0,80),null
 80,null,null
-*,UpdateAltHoldKA(0.006),null
+*,UpdateAltHoldKA(0.005),null
 *,SetSineWaveStartTime(),null
 680,SineWave(33000,800,80),null
 *,CancelAltHold(),null

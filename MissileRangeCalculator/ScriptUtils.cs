@@ -322,6 +322,7 @@ namespace MissileRangeCalculator.ScriptUtils
         public bool activated = false;
         public int priority;
         public AttitudeCombineMode combineMode = AttitudeCombineMode.Additive;
+        public float rawAngleCmd { get; protected set; }
         public float angleChange { get; protected set; }
 
         public AttitudeController(Simulator simulator, Missile owner, int priority, AttitudeCombineMode combineMode)
@@ -330,6 +331,7 @@ namespace MissileRangeCalculator.ScriptUtils
             this.owner = owner;
             this.priority = priority;
             this.combineMode = combineMode;
+            rawAngleCmd = 0f;
             angleChange = 0f;
         }
 
@@ -353,12 +355,22 @@ namespace MissileRangeCalculator.ScriptUtils
         {
             if (activated)
             {
+                UpdateRawAngleCmd();
                 UpdateAttitude();
             }
         }
 
-        public abstract void UpdateAttitude();
+        public abstract void UpdateRawAngleCmd();
 
+        public virtual void UpdateAttitude()
+        {
+            float t = simulator.curTime;
+            float maxTurnRate = simulator.GetMaxLiftForce(t) / owner.mass / simulator.curSpeed * 180.0f / 3.1415926f;
+            float gravityTurnRate = (float)simulator.GetNetG() / simulator.curSpeed * 180.0f / 3.1415926f;
+            float clampAngleCmd = Math.Max(-maxTurnRate - gravityTurnRate, Math.Min(rawAngleCmd, maxTurnRate - gravityTurnRate));
+
+            angleChange = clampAngleCmd * simulator.accuracy;
+        }
     }
 
     public class AttitudeMixer : AttitudeController
@@ -389,16 +401,16 @@ namespace MissileRangeCalculator.ScriptUtils
                 subACs[ac] = weight;
         }
 
-        public override void UpdateAttitude()
+        public override void UpdateRawAngleCmd()
         {
             float sum = 0f;
             foreach(var kv in subACs)
             {
-                kv.Key.UpdateAttitude();
-                sum += kv.Key.angleChange * kv.Value;
+                kv.Key.UpdateRawAngleCmd();
+                sum += kv.Key.rawAngleCmd * kv.Value;
             }
 
-            angleChange = sum;
+            rawAngleCmd = sum;
         }
     }
 
@@ -434,7 +446,7 @@ namespace MissileRangeCalculator.ScriptUtils
             this.tgtY = tgtY;
         }
 
-        public override void UpdateAttitude()
+        public override void UpdateRawAngleCmd()
         {
             float t = simulator.curTime;
 
@@ -445,11 +457,9 @@ namespace MissileRangeCalculator.ScriptUtils
                 LOS = delayedLOS.Dequeue();
             else
                 LOS = simulator.curAngle;
-            float maxTurnRate = simulator.GetMaxLiftForce(t) / owner.mass / simulator.curSpeed * 180.0f / 3.1415926f;
             float PPCmd = (LOS - simulator.curAngle) * kNav;
-            PPCmd = Math.Max(-maxTurnRate, Math.Min(PPCmd, maxTurnRate));
-
-            angleChange = PPCmd * simulator.accuracy;
+            
+            rawAngleCmd = PPCmd;
         }
     }
 
@@ -489,7 +499,7 @@ namespace MissileRangeCalculator.ScriptUtils
             this.tgtY = tgtY;
         }
 
-        public override void UpdateAttitude()
+        public override void UpdateRawAngleCmd()
         {
             float t = simulator.curTime;
 
@@ -512,11 +522,9 @@ namespace MissileRangeCalculator.ScriptUtils
                 LOS = 0f;
             if(isInitialInput) lastLOS = LOS;
             float LOSRate = (LOS - lastLOS) / (t - lastT);
-            float maxTurnRate = simulator.GetMaxLiftForce(t) / owner.mass / simulator.curSpeed * 180.0f / 3.1415926f;
             float PNCmd = LOSRate * kNav;
-            PNCmd = Math.Max(-maxTurnRate, Math.Min(PNCmd, maxTurnRate));
-
-            angleChange = PNCmd * simulator.accuracy;
+            
+            rawAngleCmd = PNCmd;
                 
             lastLOS = LOS;
             lastT = t;
@@ -566,17 +574,13 @@ namespace MissileRangeCalculator.ScriptUtils
             this.maxPitch = maxPitch;
         }
 
-        public override void UpdateAttitude()
+        public override void UpdateRawAngleCmd()
         {
             float altError = expectedAlt - simulator.curAlt;
             float expectedAngle = Math.Max(minPitch, Math.Min(kA * altError, maxPitch));
-            float t = simulator.curTime;
-            float maxTurnRate = simulator.GetMaxLiftForce(t) / owner.mass / simulator.curSpeed * 180.0f / 3.1415926f;
-            float gravityTurnRate = (float)simulator.GetNetG() / simulator.curSpeed * 180.0f / 3.1415926f;
             float PitchCmd = (expectedAngle - simulator.curAngle) * kP;
-            PitchCmd = Math.Max(-maxTurnRate - gravityTurnRate, Math.Min(PitchCmd, maxTurnRate - gravityTurnRate));
 
-            angleChange = PitchCmd * simulator.accuracy;
+            rawAngleCmd = PitchCmd;
         }
     }
 }

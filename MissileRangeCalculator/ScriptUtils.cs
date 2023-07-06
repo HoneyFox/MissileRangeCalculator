@@ -37,6 +37,9 @@ namespace MissileRangeCalculator.ScriptUtils
         public List<AttitudeController> activatedAttitudeControllers = null;
         public float mass = 0f;
 
+        protected List<AttitudeController> activeACs = null;
+        protected bool isActiveACDirty = true;
+
         public Missile(Simulator simulator)
         {
             this.simulator = simulator;
@@ -44,6 +47,14 @@ namespace MissileRangeCalculator.ScriptUtils
             this.engineControllers = new List<EngineController>();
             this.activatedAttitudeControllers = new List<AttitudeController>();
             this.mass = simulator.curMass;
+
+            activeACs = null;
+            isActiveACDirty = true;
+        }
+
+        public void SetACListDirty()
+        {
+            isActiveACDirty = true;
         }
 
         public virtual void Update()
@@ -74,14 +85,24 @@ namespace MissileRangeCalculator.ScriptUtils
                 }
             }
 
-            var activeACs = new List<AttitudeController>();
-            foreach (var ac in activatedAttitudeControllers)
+            if (isActiveACDirty)
             {
-                if (ac.activated) activeACs.Add(ac);
+                if (activeACs == null)
+                    activeACs = new List<AttitudeController>();
+                else
+                    activeACs.Clear();
+                foreach (var ac in activatedAttitudeControllers)
+                {
+                    if (ac.activated) activeACs.Add(ac);
+                }
+                if (activeACs.Count > 0)
+                    activeACs.Sort();
+
+                isActiveACDirty = false;
             }
+
             if (activeACs.Count > 0)
             {
-                activeACs.Sort();
                 finalAngle = simulator.curAngle;
                 var angleChange = 0f;
                 foreach (AttitudeController ac in activeACs)
@@ -344,11 +365,19 @@ namespace MissileRangeCalculator.ScriptUtils
         {
             owner.activatedAttitudeControllers.Add(this);
             activated = true;
+            owner.SetACListDirty();
         }
         public virtual void Deactivate()
         {
             owner.activatedAttitudeControllers.Remove(this);
             activated = false;
+            owner.SetACListDirty();
+        }
+
+        public virtual void SetPriority(int priority)
+        {
+            this.priority = priority;
+            owner.SetACListDirty();
         }
 
         public virtual void Update()

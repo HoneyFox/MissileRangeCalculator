@@ -169,6 +169,15 @@ namespace MissileRangeCalculator.ScriptUtils
             return false;
         }
 
+        public virtual void Deactivate()
+        {
+            if (activated == true)
+            {
+                owner.activatedEngines.Remove(this);
+                activated = false;
+            }
+        }
+
         public virtual void RequestThrust(float thrust)
         {
             requestedThrust = thrust;

@@ -41,7 +41,7 @@ namespace MissileRangeCalculator
             plotter.Clear();
             plotter.RenderLegends();
 
-            string[] parameters = Environment.CommandLine.Split(new char[]{' '}, StringSplitOptions.RemoveEmptyEntries);
+            string[] parameters = Environment.GetCommandLineArgs();
             if (parameters.Length == 2)
             {
                 string filePath = parameters[1].Trim('"');

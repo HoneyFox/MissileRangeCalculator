@@ -205,6 +205,7 @@ namespace MissileRangeCalculator
         {
             txtScript.Text =
 @"using MissileRangeCalculator;
+using MissileRangeCalculator.ScriptUtils;
 
 [DefaultClass]
 public class ScriptFunctions

@@ -108,30 +108,130 @@ namespace MissileRangeCalculator
 
             Type[] types = a.GetTypes();
             var assemblyNode = treeViewClasses.Nodes.Add("Assembly " + (overrideAssemblyName == null ? a.GetName().Name : overrideAssemblyName));
+            
+            List<TreeNode> typeNodes = new List<TreeNode>();
             foreach (Type t in types)
             {
-                var classNode = assemblyNode.Nodes.Add("class " + t.Name);
-                classNode.NodeFont = (t.GetCustomAttribute<DefaultClassAttribute>() != null ? BoldNodeFont : NormalNodeFont);
-                var ctorNode = classNode.Nodes.Add("Constructors");
-                var fieldNode = classNode.Nodes.Add("Fields");
-                var propertyNode = classNode.Nodes.Add("Properties");
-                var methodNode = classNode.Nodes.Add("Methods");
-                foreach (ConstructorInfo ci in t.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
+                if (!t.IsPublic && !t.IsNestedPublic) continue;
+
+                if (t.IsClass)
                 {
-                    ctorNode.Nodes.Add(ReflectionUtils.GetModifierStr(ci) + " " + ci.Name + "(" + ReflectionUtils.GetConstructorParameters(ci) + ")");
+                    var classNode = new TreeNode("class " + t.Name);
+                    typeNodes.Add(classNode);
+
+                    classNode.Tag = t;
+                    classNode.NodeFont = (t.GetCustomAttribute<DefaultClassAttribute>() != null ? BoldNodeFont : NormalNodeFont);
+                    var ctorNode = classNode.Nodes.Add("Constructors");
+                    var fieldNode = classNode.Nodes.Add("Fields");
+                    var propertyNode = classNode.Nodes.Add("Properties");
+                    var eventNode = classNode.Nodes.Add("Events");
+                    var methodNode = classNode.Nodes.Add("Methods");
+                    foreach (ConstructorInfo ci in t.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
+                    {
+                        ctorNode.Nodes.Add(ReflectionUtils.GetModifierStr(ci) + " " + ci.Name + "(" + ReflectionUtils.GetConstructorParameters(ci) + ")");
+                    }
+                    foreach (FieldInfo fi in t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
+                    {
+                        fieldNode.Nodes.Add(ReflectionUtils.GetModifierStr(fi) + ReflectionUtils.GetClassName(fi.FieldType) + " " + fi.Name).NodeFont = (fi.FieldType.GetCustomAttribute<ExchangeDataAttribute>() != null ? BoldNodeFont : NormalNodeFont);
+                    }
+                    foreach (PropertyInfo pi in t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
+                    {
+                        propertyNode.Nodes.Add(ReflectionUtils.GetClassName(pi.PropertyType) + " " + pi.Name + " {" + (pi.GetMethod != null ? ReflectionUtils.GetModifierStr(pi.GetMethod) + "get;" : "") + (pi.SetMethod != null ? ReflectionUtils.GetModifierStr(pi.SetMethod) + "set;" : "") + "}");
+                    }
+                    foreach (EventInfo ei in t.GetEvents(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
+                    {
+                        eventNode.Nodes.Add("event " + ReflectionUtils.GetClassName(ei.EventHandlerType) + " " + ei.Name).NodeFont = NormalNodeFont;
+                    }
+                    var properties = t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                    var events = t.GetEvents(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                    foreach (MethodInfo mi in t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
+                    {
+                        bool isPropertyAccessor = properties.Any(prop => 
+                            (prop.GetMethod != null && prop.GetMethod.MethodHandle == mi.MethodHandle)
+                            || (prop.SetMethod != null && prop.SetMethod.MethodHandle == mi.MethodHandle)
+                        );
+                        if (isPropertyAccessor) continue;
+                        bool isEventAccessor = events.Any(ev => 
+                            (ev.AddMethod != null && ev.AddMethod.MethodHandle == mi.MethodHandle)
+                            || (ev.RemoveMethod != null && ev.RemoveMethod.MethodHandle == mi.MethodHandle)
+                        );
+                        if (isEventAccessor) continue;
+
+                        bool isOverridable = mi.IsVirtual && !mi.IsFinal;
+                        bool useBoldFont = mi.GetCustomAttribute<StartMethodAttribute>() != null || mi.GetCustomAttribute<UpdateMethodAttribute>() != null || mi.GetCustomAttribute<PostUpdateMethodAttribute>() != null;
+                        methodNode.Nodes.Add(ReflectionUtils.GetModifierStr(mi) + (isOverridable ? "virtual " : "") + (mi.ReturnType != null ? ReflectionUtils.GetClassName(mi.ReturnType) : "void") + " " + mi.Name + "(" + ReflectionUtils.GetMethodParameters(mi) + ")").NodeFont = (useBoldFont ? BoldNodeFont : NormalNodeFont);
+                    }
                 }
-                foreach (FieldInfo fi in t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
+                else if (t.IsEnum)
                 {
-                    fieldNode.Nodes.Add(ReflectionUtils.GetModifierStr(fi) + ReflectionUtils.GetClassName(fi.FieldType) + " " + fi.Name).NodeFont = (fi.FieldType.GetCustomAttribute<ExchangeDataAttribute>() != null ? BoldNodeFont : NormalNodeFont);
+                    var enumNode = new TreeNode("enum " + t.Name);
+                    typeNodes.Add(enumNode);
+                    enumNode.Tag = t;
+                    enumNode.NodeFont = NormalNodeFont;
+                    foreach (var name in Enum.GetNames(t))
+                    {
+                        enumNode.Nodes.Add(name + " = " + Convert.ChangeType(Enum.Parse(t, name), Enum.GetUnderlyingType(t)).ToString());
+                    }
                 }
-                foreach (PropertyInfo pi in t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
+                else if (t.IsInterface)
                 {
-                    propertyNode.Nodes.Add(ReflectionUtils.GetClassName(pi.PropertyType) + " " + pi.Name + " {" + (pi.GetMethod != null ? ReflectionUtils.GetModifierStr(pi.GetMethod) + "get;" : "") + (pi.SetMethod != null ? ReflectionUtils.GetModifierStr(pi.SetMethod) + "set;" : "") + "}");
+                    var interfaceNode = new TreeNode("interface " + t.Name);
+                    typeNodes.Add(interfaceNode);
+                    interfaceNode.Tag = t;
+                    interfaceNode.NodeFont = NormalNodeFont;
+                    var propertyNode = interfaceNode.Nodes.Add("Properties");
+                    var eventNode = interfaceNode.Nodes.Add("Events");
+                    var methodNode = interfaceNode.Nodes.Add("Methods");
+                    foreach (PropertyInfo pi in t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
+                    {
+                        propertyNode.Nodes.Add(ReflectionUtils.GetClassName(pi.PropertyType) + " " + pi.Name + " {" + (pi.GetMethod != null ? ReflectionUtils.GetModifierStr(pi.GetMethod) + "get;" : "") + (pi.SetMethod != null ? ReflectionUtils.GetModifierStr(pi.SetMethod) + "set;" : "") + "}");
+                    }
+                    foreach (EventInfo ei in t.GetEvents(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
+                    {
+                        eventNode.Nodes.Add("event " + ReflectionUtils.GetClassName(ei.EventHandlerType) + " " + ei.Name).NodeFont = NormalNodeFont;
+                    }
+                    var properties = t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                    var events = t.GetEvents(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                    foreach (MethodInfo mi in t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static))
+                    {
+                        bool isPropertyAccessor = properties.Any(prop =>
+                            (prop.GetMethod != null && prop.GetMethod.MethodHandle == mi.MethodHandle)
+                            || (prop.SetMethod != null && prop.SetMethod.MethodHandle == mi.MethodHandle)
+                        );
+                        if (isPropertyAccessor) continue;
+                        bool isEventAccessor = events.Any(ev =>
+                            (ev.AddMethod != null && ev.AddMethod.MethodHandle == mi.MethodHandle)
+                            || (ev.RemoveMethod != null && ev.RemoveMethod.MethodHandle == mi.MethodHandle)
+                        );
+                        if (isEventAccessor) continue;
+
+                        methodNode.Nodes.Add(ReflectionUtils.GetClassName(mi.ReturnType) + " " + mi.Name + "(" + ReflectionUtils.GetMethodParameters(mi) + ")");
+                    }
                 }
-                foreach (MethodInfo mi in t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
+            }
+
+            foreach (TreeNode treeNode in typeNodes)
+            {
+                if ((treeNode.Tag as Type).IsNested)
                 {
-                    bool useBoldFont = mi.GetCustomAttribute<StartMethodAttribute>() != null || mi.GetCustomAttribute<UpdateMethodAttribute>() != null || mi.GetCustomAttribute<PostUpdateMethodAttribute>() != null;
-                    methodNode.Nodes.Add(ReflectionUtils.GetModifierStr(mi) + (mi.ReturnType != null ? ReflectionUtils.GetClassName(mi.ReturnType) : "void") + " " + mi.Name + "(" + ReflectionUtils.GetMethodParameters(mi) + ")").NodeFont = (useBoldFont ? BoldNodeFont : NormalNodeFont);
+                    Type declaringType = (treeNode.Tag as Type).DeclaringType;
+                    TreeNode parentNode = null;
+                    foreach (TreeNode tn in typeNodes)
+                    {
+                        if (tn.Tag as Type == declaringType)
+                        {
+                            parentNode = tn;
+                            break;
+                        }
+                    }
+                    if (parentNode != null)
+                    {
+                        parentNode.Nodes.Add(treeNode);
+                    }
+                }
+                else
+                {
+                    assemblyNode.Nodes.Add(treeNode);
                 }
             }
         }

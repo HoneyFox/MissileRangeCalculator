@@ -265,10 +265,12 @@ namespace MissileRangeCalculator
                         {
                             if (angleRateInfo[i].useTargetAngle)
                             {
-                                if (angleRateInfo[i].targetAngle >= curAngle)
+                                if (angleRateInfo[i].targetAngle > curAngle)
                                     liftAccRequired = angleRateInfo[i].liftGMax * 9.81f;
-                                else
+                                else if (angleRateInfo[i].targetAngle < curAngle)
                                     liftAccRequired = angleRateInfo[i].liftGMin * 9.81f;
+                                else
+                                    liftAccRequired = 0.0f;
                             }
                             else
                             {

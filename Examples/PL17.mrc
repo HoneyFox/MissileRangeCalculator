@@ -20,7 +20,7 @@ MRCData
 15,100,276~277 // Hi-Alt Booster
 510,3,0 // RCS for attitude control
 12,50,274~275
-300,2,0 // RCS for attitude control
+200,2,0 // RCS for attitude control
 8
 2,0g
 1,1g
@@ -29,7 +29,7 @@ MRCData
 210,0g~8g,35
 70,8g,35
 180,0g
-50,-4g~1g,-70
+50,-4g~1g,-40
 0
 1
 
